@@ -1,0 +1,122 @@
+{
+    "0":{
+        "Name"           :  "The Final Countdown",
+        "Artist"         :  "Europe",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/TheFinalCountdown.mid",
+        "VocalTrackType" :  "Lyrics",
+        "VocalsFilePath" :  "Words",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  4,
+        "VibratorTrack"  :  15,
+        "Volume"         :  0.5
+    },
+    "1":{
+        "Name"           :  "The Only Thing They Fear is You",
+        "Artist"         :  "Mick Gordon",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/E1M1.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  2,
+        "VibratorTrack"  :  5,
+        "Volume"         :  2.0
+    },
+    "2":{
+        "Name"           :  "Bring me To Life",
+        "Artist"         :  "Evanescence",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/BringMeToLife.mid",
+        "VocalTrackType" :  "SideCar",
+        "VocalsFilePath" :  "python/AlarmClock/MidiFiles/VocalTracks/BringMeToLife.ogg",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  4,
+        "VibratorTrack"  :  5,
+        "Volume"         :  0.5
+    },
+    "3":{
+        "Name"           :  "Deja-Vu",
+        "Artist"         :  "Dave Rogers",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/DeJaVu.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "python/AlarmClock/MidiFiles/VocalTracks/DejaVu.mp3",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  1,
+        "VibratorTrack"  :  8,
+        "Volume"         :  0.5
+    },
+    "4":{
+        "Name"           :  "Du Hast",
+        "Artist"         :  "Ramminstien",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/DuHast.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  1,
+        "VibratorTrack"  :  3,
+        "Volume"         :  0.5
+    },
+    "5":{
+        "Name"           :  "Eye Of The Tiger",
+        "Artist"         :  "Survivor",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/EyeOfTheTiger.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  1,
+        "VibratorTrack"  :  6,
+        "Volume"         :  0.5
+    },
+    "6":{
+        "Name"           :  "Crazy Train",
+        "Artist"         :  "Ozzy Osborne",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/CrazyTrain.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  6,
+        "VibratorTrack"  :  5,
+        "Volume"         :  0.5
+    },
+    "7":{
+        "Name"           :  "Mice On Venus",
+        "Artist"         :  "C418",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/MiceOnVenus.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  6,
+        "VibratorTrack"  :  5,
+        "Volume"         :  0.5
+    },
+    "8":{
+        "Name"           :  "Today",
+        "Artist"         :  "The Smashing Pumpkins",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/Today.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  1,
+        "VibratorTrack"  :  3,
+        "Volume"         :  0.5
+    },
+    "9":{
+        "Name"           :  "Sandstorm",
+        "Artist"         :  "Darude",
+        "Soundfont"      :  "Arachno.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/Sandstorm.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  7,
+        "VibratorTrack"  :  9,
+        "Volume"         :  0.5
+    }
+}

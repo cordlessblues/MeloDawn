@@ -1,0 +1,16 @@
+{
+    "0":{
+        "Message" : "@Name",
+        "triggerTime" : "1:13 PM",
+        "RandSnooze" : true,
+        "Enabled" : true,
+        "AlarmTone":0
+    },
+    "1":{
+        "Message"       :  "yeet",
+        "triggerTime"   :  "10:53 AM",
+        "RandSnooze"    :  true,
+        "Enabled"       :  true,
+        "AlarmTone"     :  -1
+    }
+}
