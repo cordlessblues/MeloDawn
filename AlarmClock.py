@@ -16,9 +16,15 @@ pygame.init()
 
 
 # Screen size
-WIDTH = 1920
-HEIGHT = 1080
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+WIDTH = 1280
+widthScale = WIDTH / 1920
+print(f"widthScale: {widthScale}")
+HEIGHT = 720
+heightScale = HEIGHT / 1080
+print(f"heightScale: {heightScale}")
+ScaleOffset = min(widthScale, heightScale) 
+print(f"ScaleOffset: {heightScale}")
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AlarmClock")
 
 pygame.mixer.init()
@@ -32,15 +38,15 @@ GREEN = (25,255,100)
 TEAL = (255/(8*1.5),255/1.5,255/1.5)
 
 # Clock parameters
-scale = 700
-radius = 30
-offset = 100
-center_x, center_y = WIDTH // 2, HEIGHT // 2 
-offset_x, offset_y = WIDTH // 4.2, 0
+scale = 700  * ScaleOffset 
+radius = 30  * ScaleOffset
+offset = 100 * ScaleOffset
+center_x, center_y = (WIDTH // 2), (HEIGHT // 2)
+offset_x, offset_y = (WIDTH // 4.2), 0 
 points_per_corner = 0
 points_per_side = 15 - points_per_corner
-lineWidth = 10
-lineRadius = 5
+lineWidth = round(10 * ScaleOffset)
+lineRadius = 5 
 
 StartPoints = []
 EndPoints=[]
@@ -56,7 +62,7 @@ NextIndexColor = 1
 # Text Settings
 ClockColor = ColorUtils.DynamicColor(0.0,0.0,(0,0,0),(0,0,0),(0,0,0))
 ClockColor.setTargetColor(WHITE)
-TextPosX,TextPosY = center_x - offset_x ,center_y - offset_y    
+TextPosX,TextPosY = center_x - offset_x ,center_y - offset_y 
 
 # Alarm settings
 alarms = FetchAlarms("python/AlarmClock/Alarms.json","python/AlarmClock/RingTones.json")
@@ -115,12 +121,12 @@ EndPoints   = get_points_on_edge(
 
 
 FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
-clockLargeFont     =  Font(FontPath, ( 12 * 12 ))
-clockSmallFont     =  Font(FontPath, ( 12 * 3  ))
-CalLargeFont       =  Font(FontPath, ( 12 * 2  ))
-CalSmallFont       =  Font(FontPath, ( 12 * 1  ))
-MessageFont        =  Font(FontPath, ( 12 * 5  ))
-iconFont           =  Font(FontPath, ( 12 * 2  ))
+clockLargeFont     =  Font(FontPath, ( round((12 * 12) * ScaleOffset)  ))
+clockSmallFont     =  Font(FontPath, ( round((12 * 3 ) * ScaleOffset)   ))
+CalLargeFont       =  Font(FontPath, ( round((12 * 2 ) * ScaleOffset*2)   ))
+CalSmallFont       =  Font(FontPath, ( round((12 * 1 ) * ScaleOffset*2)   ))
+MessageFont        =  Font(FontPath, ( round((12 * 5 ) * ScaleOffset)   ))
+iconFont           =  Font(FontPath, ( round((12 * 2 ) * ScaleOffset)   ))
 
 vibratorColor = DynamicColor( 0.0, 0.0, ClockColor.getColor(), ClockColor.getColor())
 speakerColor  = DynamicColor( 0.0, 0.0, ClockColor.getColor(), ClockColor.getColor())
@@ -156,9 +162,6 @@ while running:
         else:
             ClockColor.setTargetColor(WHITE,True)
     
-    
-    iconPos = pygame.Vector2(WIDTH-(WIDTH/(16+(32/4))),HEIGHT-120)
-    
     #CalendarDrawing stuff
     TextSubjectNames = []
     TextAssignmentNames = []
@@ -177,8 +180,8 @@ while running:
     TextRectLaunchDueDate = []
     
     
-    textSpacing = 10
-    objectSpacing = 60
+    textSpacing = 10 * ScaleOffset * 2
+    objectSpacing = 60 * ScaleOffset * 2
     NextItemoffset = 0
     if data_ready_event.is_set():
         for i in range(len(calData)):
@@ -215,9 +218,9 @@ while running:
             
             calWidth = max(calWidth,TextRectSubjectNames[i].width,TextRectAssignmentNames[i].width,TextRectDueDate[i].width)
             if i-1 >= 0: TextRectSubjectNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectSubjectNames[i].width/2 ,(TextRectDueDate[i-1].bottom + objectSpacing))
-            else: TextRectSubjectNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectSubjectNames[i].width/2 ,(150 + textSpacing))
+            else: TextRectSubjectNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectSubjectNames[i].width/2 ,((150*ScaleOffset) + textSpacing))
             TextRectAssignmentNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectAssignmentNames[i].width/2 , (TextRectSubjectNames[i].bottom+textSpacing))
-            Background = pygame.draw.rect(screen, calData[i].getSubjectColors()[3].getColor(), (TextRectSubjectNames[i].left - 10, TextRectSubjectNames[i].top,  calWidth+25,  TextRectAssignmentNames[i].bottom - TextRectSubjectNames[i].top), border_radius=5)
+            Background = pygame.draw.rect(screen, calData[i].getSubjectColors()[3].getColor(), (TextRectSubjectNames[i].left - 10, TextRectSubjectNames[i].top,  calWidth+25,  TextRectAssignmentNames[i].bottom - TextRectSubjectNames[i].top), border_radius=round(5* ScaleOffset*2))
             TextRectDueDate[i].topleft = (Background.right - TextRectDueDate[i].width-5,(Background.top))
             
             #MARK: CalBlit
@@ -229,17 +232,17 @@ while running:
             if calData[i].getSubjectColors()[3].getColor() != (0,0,0):
                 screen.blit(TextDueDate[i],TextRectDueDate[i])
             
-            
+
             Bar = pygame.draw.rect(
                 screen,
                 calData[i].getSubjectColors()[4].getColor(),
                 (
                     Background.left,
                     Background.top, 
-                    5, 
+                    round(5*ScaleOffset*2),
                     Background.height  
                     ), 
-                border_radius=10
+                border_radius=round(10*ScaleOffset*2)
                 )
             for c in calData[i].getSubjectColors():
                 c.Update(1/((i+1)/5),deltaTime)
