@@ -1,0 +1,12 @@
+{
+    "Calender":{
+        "AnyNameHere":{
+            "URL":"https://calendar.com/example.ics",
+            "FixApple":false
+        },
+        "IMeanAnything":{
+            "URL":"https://calendar.com/example.ics",
+            "FixApple":false
+        }
+    }
+}
