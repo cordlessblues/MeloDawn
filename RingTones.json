@@ -110,7 +110,7 @@
     "9":{
         "Name"           :  "Sandstorm",
         "Artist"         :  "Darude",
-        "Soundfont"      :  "Arachno.sf2",
+        "Soundfont"      :  "gm.sf2",
         "FilePath"       :  "python/AlarmClock/MidiFiles/Sandstorm.mid",
         "VocalTrackType" :  "None",
         "VocalsFilePath" :  "",
