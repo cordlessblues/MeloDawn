@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 import math
 from ColorUtils import *
 import threading
-
+from MidiPlayer import *
 
 
 class Ringtone:
@@ -16,7 +16,7 @@ class Ringtone:
         self.Title = data["Name"]
         self.Artist = data["Artist"]
         self.filepath = data["FilePath"]
-        
+        self.MidiPlayer = None
         self.SideTrackEnabled = False
         self.LyricsEnabled = False
         self.lyricsTrack = 0
@@ -69,7 +69,6 @@ class Ringtone:
             "Lavender": (180, 190, 254),
         }
         self.TextColor = [
-            self.colorPallete["Mauve"],
             self.colorPallete["Red"],
             self.colorPallete["Peach"],
             self.colorPallete["Yellow"],
@@ -79,6 +78,7 @@ class Ringtone:
             self.colorPallete["Sapphire"],
             self.colorPallete["Blue"],
             self.colorPallete["Lavender"],
+            self.colorPallete["Mauve"],
         ]
 
     def getInfo(self,p="",Child=False):
@@ -98,56 +98,6 @@ class Ringtone:
     def getData(self):
         return self.data
     
-    def getTrackNames(self):
-        if self.LyricsEnabled:
-            index = 0
-        for track in self.midi.tracks:
-            for msg in track:
-                if msg.type == "track_name":
-                    if self.LyricsEnabled:
-                        if msg.name == self.SideTrack:
-                            self.lyricsTrack = index
-                    self.trackNames.append(msg.name)
-            if self.LyricsEnabled:
-                index+=1
-    def calculateCurrentTime(
-        self
-    ):  # Pass track_index
-        if self.IsPlaying:
-            currentTime = time.time() - self.startTime
-            output = 0.0
-            for trackIndex in range(self.numTracks):
-                    if self.isTrackFinished[trackIndex] or trackIndex in self.ignore_tracks:
-                        continue
-                    
-                    msgIndex = self.messageIndices[trackIndex]
-                    if msgIndex < len(self.absolute_times[trackIndex]):  
-                        if (currentTime>= self.absolute_times[trackIndex][msgIndex]):
-                            output = currentTime
-            return(currentTime)
-        else:
-            return(0.00)
-
-    def calculateAbsoluteTime(
-        self, ticks_per_beat: int, track: mido.MidiTrack, track_index: int
-    ):  # Pass track_index
-        absolute_times_for_track: List[float] = []  # Create a new list for this track
-        current_time_ticks = 0  # Reset for each track
-        
-        for message in track:
-            current_time_ticks += message.time
-            if message.type == "set_tempo":
-                self.tempo_microseconds_per_beat = message.tempo
-            delay = 0
-            if self.SideTrackDelay<0: delay = abs(self.SideTrackDelay) 
-            self.seconds_per_beat = self.tempo_microseconds_per_beat / 1000000.0
-            self.seconds_per_tick = self.seconds_per_beat / ticks_per_beat
-            self.absolute_time_seconds = current_time_ticks * self.seconds_per_tick
-            absolute_times_for_track.append(self.absolute_time_seconds + delay)
-
-        self.absolute_times.append(
-            absolute_times_for_track
-        )  # Append the list for the track
         
 
     
@@ -161,55 +111,7 @@ class Ringtone:
         SideChannel.play(Track)
     
     def Stop(self):
-        self.mixer.stop()
         self.IsPlaying = False
-    
-    def play(self, volume=1.0):
-        self.SongTimer 
-        import os
-        os.environ["SDL_SOUNDFONTS"] = self.soundFontPath
-        filename = self.filepath.split("/")[len(self.filepath.split("/")) - 1]
-        print(f"loaded {filename}")
-
-        self.numTracks = len(self.midi.tracks)
-        self.isTrackFinished = [False] * self.numTracks
-        self.trackMessages = [[] for _ in range(self.numTracks)]
-        self.startTime = time.time()
-        self.clock = pygame.time.Clock()
-        self.IsPlaying = True
-        self.brickState = [False] * self.numTracks
-        self.messageIndices = [0] * self.numTracks
-        self.brickColors = []
-        self.get_ignore_tracks()
-        for i in range(len(self.midi.tracks)):  # Initialize brickColors
-            self.brickColors.append(
-                DynamicColor(
-                    0.5,
-                    0.5,
-                    self.TextColor[i % len(self.TextColor)],
-                    (0, 0, 0),
-                    (0, 0, 0),
-                )
-            )
-            self.brickColors[i].Update()
-
-        try:
-            
-            self.mixer.music.load(self.filepath)
-            if self.MidiMute:
-                self.mixer.music.set_volume(0)
-            else:
-                self.mixer.music.set_volume(volume)
-            print(f"Attempting to play: {filename}")
-            if self.SideTrackEnabled:
-                side_track_thread = threading.Thread(target=self.play_side_track, args=(self.SideTrack, volume, self.SideTrackDelay))
-                side_track_thread.start()
-                if self.SideTrackDelay <0: time.sleep(abs(self.SideTrackDelay))
-                self.mixer.music.play()
-            else:
-                self.mixer.music.play()
-        except pygame.error as e:
-            print(f"Pygame error during playback: {e}")
 
     def extractLyrics(self, MessageType: str = "text") -> List[str]:
         lyrics: List[str] = []
@@ -229,10 +131,6 @@ class Ringtone:
 
     def drawIndicatorBrick(self, screen, x, y, width, height, color):
         pygame.draw.rect(screen, color, (x, y, width, height))
-
-    def get_valid_tracks(self, screen):
-        """Filters the non-ignored tracks for rendering bricks"""
-        return [i for i, finished in enumerate(self.isTrackFinished) if not finished and i not in self.ignore_tracks]
 
     def get_total_duration(self, ticks_per_beat:int) -> float:
         """Calculates the total duration of the MIDI file in seconds."""
@@ -257,104 +155,52 @@ class Ringtone:
         self.ignore_tracks = {0}
         return self.ignore_tracks
 
-    def Update(self, Screen):
+    def play(self):
+        self.startTime = time.time()
+        self.MidiPlayer = MidiPlayer(self.filepath)
+        self.MidiPlayer.play()
+        self.IsPlaying=True
+    
+    
+    def Update(self, Screen,deltaTime):
+        #print("yes we are here")
         if self.IsPlaying:
-            
-            self.absolute_times = []  # Clear old absolute times
-
-            for trackIndex, track in enumerate(self.midi.tracks):
-                self.calculateAbsoluteTime(
-                    self.midi.ticks_per_beat, track, trackIndex
-                )  # Pass the trackIndex
-
-            deltaTime = 0.0
-            currentTime = time.time() - self.startTime
-            activeTracks = self.get_valid_tracks(Screen)
-            if len(activeTracks) == 0:
-                self.IsPlaying=False
-
-
-            #print(self.lyricsTrack)
-            trackIndex = self.lyricsTrack
-            msgIndex = self.messageIndices[trackIndex]
-            if msgIndex < len(self.absolute_times[trackIndex]):  
-                if (currentTime>= self.absolute_times[trackIndex][msgIndex]):
-                    msg = self.midi.tracks[trackIndex][msgIndex]
-                    if trackIndex == self.lyricsTrack:
-                        if msg.type == "text":
-                            #print(str(msg.text))
-                            if str(msg.text).find("@L") > -1 or str(msg.text).find("@T") > -1 or str(msg.text).find("/") > -1:
-                                self.CurrentLyric = (
-                                    str(msg.text)
-                                    .replace("@T ", "TITLE: ")
-                                    .replace("@L", "LANG: ")
-                                    .replace("\\", "")
-                                    .replace("/", "")
-                                )
-                            elif  str(msg.text).find("\\") > -1:
-                                self.CurrentLyric = ""
-                            else: 
-                                self.CurrentLyric += (
-                                    str(msg.text)
-                                    .replace("@T ", "TITLE: ")
-                                    .replace("@L", "LANG: ")
-                                    .replace("\\", "")
-                                    .replace("/", "")
-                                )
-            
-            
-            
-            
-            for trackIndex in range(self.numTracks):
-                if self.isTrackFinished[trackIndex] or trackIndex in self.ignore_tracks:
-                    continue
-                
-                msgIndex = self.messageIndices[trackIndex]
-                if msgIndex < len(self.absolute_times[trackIndex]):  
-                    if (currentTime>= self.absolute_times[trackIndex][msgIndex]):
-                        self.CurremtTimeInTrack = self.absolute_times[trackIndex][msgIndex]
-                        
-                        msg = self.midi.tracks[trackIndex][msgIndex]
-                        
-                        if msg.type == "end_of_track":
-                            self.isTrackFinished[trackIndex] = True
-                            continue
-                        if msg.type == "note_on":
-                            self.brickState[trackIndex] = True
-                        if msg.type == "note_off":
-                            self.brickState[trackIndex] = False
-                        self.messageIndices[trackIndex] += 1  # Increment message index after processing
-
-
-            
-            updateRate = 1
+            updateRate = 1/10
             self.bricks = []  # Clear bricks each frame
-            trackAmount = len(activeTracks) # Count remaining valid tracks that are updating the blocks and are on screen
+            brickAmount = len(self.MidiPlayer.getTrackState())
+            #print(brickAmount)
+            brickWidth = Screen.get_width() / brickAmount if brickAmount != 0 else 0
 
-            brickWidth = Screen.get_width() / trackAmount if trackAmount !=0 else 0
-            for i, trackIndex in enumerate(activeTracks):  
-                
+            if len(self.brickColors) == 0:
+                for _ in range(brickAmount): # fix: itterate with blank assignment
+                    # if color list is zero allocate the dynamic color instance
+                    colorvalue=self.TextColor[_ % len(self.TextColor)] #assign all colors in an instance
+                    self.brickColors.append(DynamicColor(colorvalue, blendColors(colorvalue,(0,0,0),25/100)))
+
+            for i, trackActive in enumerate(self.MidiPlayer.getTrackState()):  
+                #print(len(self.brickColors))
                 brickHeight = 20 
                 x = i * brickWidth  
                 y = Screen.get_height() - brickHeight
-                
-                
-                Currentcolor = self.brickColors[trackIndex]  
 
-                if self.brickState[trackIndex]:
-                    Currentcolor.setTargetColor(
-                        self.TextColor[trackIndex % len(self.TextColor)], True
-                    )
+                Currentcolor = self.brickColors[i] # access color using incrementer
+                #print(self.brickColors[i].getColor())
+
+                if trackActive: #change is using the active state instead of before
+                    Currentcolor.setTargetColor(self.TextColor[i % len(self.TextColor)], True) 
                     Currentcolor.Update(updateRate=updateRate, deltaTime=deltaTime)
                 else:
-                    Currentcolor.setTargetColor(blendColors((0, 0, 0),self.TextColor[trackIndex % len(self.TextColor)],20/100), True)
+                    Currentcolor.setTargetColor(blendColors((0, 0, 0),self.TextColor[i % len(self.TextColor)],20/100), True)
                     Currentcolor.Update(updateRate=updateRate * 2, deltaTime=deltaTime)
 
-                
+
                 self.bricks.append(
                     (Currentcolor.getColor(), (x, y, brickWidth, brickHeight))
                 )
                 Currentcolor.Update()
+
+
+
     def getName(self):
         return self.Name
     
@@ -365,8 +211,9 @@ class Ringtone:
         return(f"{Minutes}:{"{:02d}".format(Seconds)}") 
     
     def GetSongDuration(self):
-        Seconds = int(self.absolute_time_seconds % 60)
-        Minutes = int((self.absolute_time_seconds // 60) % 60)
+        
+        Seconds = int(self.MidiPlayer.getDuration() % 60)
+        Minutes = int((self.MidiPlayer.getDuration() // 60) % 60)
         return(f"{Minutes}:{"{:02d}".format(Seconds)}") 
     
     def getArtist(self):
@@ -379,7 +226,7 @@ class Ringtone:
         return self.bricks
     
     def getBrickState(self, index):
-        return self.brickState[index]
+        return self.MidiPlayer.getTrackState()[index]
 
     def getBrickColor(self, index):
         return self.brickColors[index]
@@ -388,6 +235,4 @@ class Ringtone:
         return self.bricks[index][1]
     
     def GetLyric(self):
-        return(self.CurrentLyric)
-
-
+        return self.MidiPlayer.getCurrentLyric()

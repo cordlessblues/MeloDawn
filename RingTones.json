@@ -118,5 +118,17 @@
         "LightTrack"     :  7,
         "VibratorTrack"  :  9,
         "Volume"         :  0.5
+    },
+    "10":{
+        "Name"           :  "Order (Ultrakill)",
+        "Artist"         :  "Arsi \"Hakita\" Patala",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/ORDER.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  7,
+        "VibratorTrack"  :  9,
+        "Volume"         :  0.5
     }
 }

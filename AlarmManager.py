@@ -81,26 +81,27 @@ class Alarm():
         else:
             self.triggerTime = self.triggerTime.combine(datetime.now().date(),self.triggerTime.time()) + timedelta(minutes=5)
             
-    def Activate(self,Screen):
+    def Activate(self,Screen,deltaTime):
         if self.Active == False:
             print("activated")
             self.Active=True
         if self.Enabled and not self.Quieted:
                 self.Active = True
                 self.getAlarmTone().activate()
-                self.getAlarmTone().Update(Screen)
+                #print("updating")
+                self.getAlarmTone().Update(Screen,deltaTime)
         
     
-    def Update(self,Screen):
+    def Update(self,Screen,deltaTime):
         deltaZero = timedelta(weeks = 0 ,days = 0 ,hours = 0 ,minutes = 0 ,seconds = 0 ,milliseconds = 0 ,microseconds = 0)
         TriggerTime = self.triggerTime.combine(datetime.now().date(),self.triggerTime.time())
         if TriggerTime - datetime.now() + timedelta(minutes=5)  <= deltaZero:
             if not self.getAlarmTone().getTone().IsPlaying:
                 self.Quiet()
             else:
-                self.getAlarmTone().Update(Screen)
+                self.getAlarmTone().Update(Screen,deltaTime)
         elif TriggerTime - datetime.now() <= deltaZero:
-            self.Activate(Screen)
+            self.Activate(Screen,deltaTime)
         else:
             self.Deactivate()
         
@@ -157,16 +158,16 @@ class AlarmTone():
     def getLightColor(self):
         return(self.getTone().getBrickColor(self.getTone().getData()["LightTrack"]))
     
-    def Update(self,Screen:pygame.surface):
+    def Update(self,Screen:pygame.surface,deltaTime):
         if self.active:
             if not self.getTone().IsPlaying:
                 self.getTone().play()
             else:
-                self.getTone().Update(Screen)
+                #print("Tone Updating")
+                self.getTone().Update(Screen,deltaTime)
 
     def activate(self):
         self.active=True
-        self.getTone().getTrackNames()
         
     def deactivate(self):
         self.active = False
@@ -187,7 +188,7 @@ def FetchAlarms (FilePath,RingPath):
             RingData = json.load(r)
             for i in AlarmData:
                 currentAlarm = AlarmData[str(i)]
-                print(currentAlarm)
+                #print(currentAlarm)
                 TimeCode = datetime.strptime(currentAlarm["triggerTime"], "%I:%M %p")
                 if str(currentAlarm["AlarmTone"]) == "-1":
                     CurrentRingTone= RingData[str( randint( 0, ( len( RingData ) - 1 ) ) ) ]

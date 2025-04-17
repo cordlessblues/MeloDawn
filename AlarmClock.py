@@ -292,7 +292,7 @@ while running:
     
     
     for a in alarms:
-        a.Update(screen)
+        a.Update(screen,deltaTime)
         
         if a.IsActive():
             for color, rect in a.getAlarmTone().getTone().getBricks():
@@ -316,13 +316,13 @@ while running:
             
             MessageRect.left = 0
             ArtistRect.left = 0
-            DurationRect.left = ArtistRect.right + 10
+            DurationRect.left = ArtistRect.right + (10*ScaleOffset)
             LyricsRect.left = WIDTH - LyricsRect.width
             
-            MessageRect.top = HEIGHT - (MessageRect.height + ArtistRect.height)
-            ArtistRect.top = MessageRect.bottom - (ArtistRect.height-ArtistRect.height/2-10)
-            DurationRect.top = ArtistRect.top + (DurationRect.height/2-4)
-            LyricsRect.top = HEIGHT - LyricsRect.height - 20
+            MessageRect.top = HEIGHT - (MessageRect.height + DurationRect.height)
+            ArtistRect.top = MessageRect.bottom - (ArtistRect.height-ArtistRect.height/2-(10 * ScaleOffset))
+            DurationRect.top = ArtistRect.top + (ArtistRect.height/2) - (DurationRect.height/2)
+            LyricsRect.top = HEIGHT - LyricsRect.height - (20 * ScaleOffset)
             
             screen.blit(MessageText  ,  MessageRect)
             screen.blit(ArtistText   ,  ArtistRect)

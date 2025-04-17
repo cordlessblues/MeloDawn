@@ -8,9 +8,9 @@
     },
     "1":{
         "Message"       :  "yeet",
-        "triggerTime"   :  "11:42 AM",
+        "triggerTime"   :  "11:59 AM",
         "RandSnooze"    :  true,
         "Enabled"       :  true,
-        "AlarmTone"     :  8
+        "AlarmTone"     :  3
     }
 }
