@@ -17,6 +17,7 @@ class Ringtone:
         self.Artist = data["Artist"]
         self.filepath = data["FilePath"]
         self.MidiPlayer = None
+        self.ScaleOffset = 1
         self.SideTrackEnabled = False
         self.LyricsEnabled = False
         self.lyricsTrack = 0
@@ -93,7 +94,8 @@ class Ringtone:
             print(f"{p}    {color}")
         print(f"{p}"+"}")
 
-        
+    def setScaleOffset(self,s):
+        self.ScaleOffset = s
         
     def getData(self):
         return self.data

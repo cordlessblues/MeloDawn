@@ -16,10 +16,10 @@ pygame.init()
 
 
 # Screen size
-WIDTH = 1280
+WIDTH = 800
 widthScale = WIDTH / 1920
 print(f"widthScale: {widthScale}")
-HEIGHT = 720
+HEIGHT = 480
 heightScale = HEIGHT / 1080
 print(f"heightScale: {heightScale}")
 ScaleOffset = min(widthScale, heightScale) 
@@ -92,7 +92,7 @@ def GetData():
 def periodic_fetch():
     while True:
         GetData()    # Fetch the data
-        time.sleep(10800)  # Wait for 3 hours
+        time.sleep((1*60)*60)  # Wait for 3 hours
 
 periodic_thread = threading.Thread(target=periodic_fetch, daemon=True)
 periodic_thread.start()
@@ -295,36 +295,37 @@ while running:
         a.Update(screen,deltaTime)
         
         if a.IsActive():
+            a.setScaleOffset(ScaleOffset)
             for color, rect in a.getAlarmTone().getTone().getBricks():
                 pygame.draw.rect(screen, color, rect)
         
         
-            message = a.getTitle()
+            Title = a.getTitle()
             Artist = a.getArtist()
             Duration = a.getDuration()
             Lyrics = a.getLyrics()
             #print(Lyrics)
-            MessageText = MessageFont.render(message,True,ClockColor.getColor())
+            TitleText = MessageFont.render(Title,True,ClockColor.getColor())
             ArtistText = clockSmallFont.render(Artist,True,blendColors(ClockColor.getColor(),(0,0,0),30/100))
             DurationText = CalLargeFont.render(Duration,True,blendColors(ClockColor.getColor(),(0,0,0),60/100))
             LyricsText = MessageFont.render(Lyrics,True,ClockColor.getColor())
             
-            MessageRect = MessageText.get_rect()
+            TitleRect = TitleText.get_rect()
             ArtistRect = ArtistText.get_rect()
             DurationRect = DurationText.get_rect() 
             LyricsRect = LyricsText.get_rect() 
             
-            MessageRect.left = 0
+            TitleRect.left = 0
             ArtistRect.left = 0
             DurationRect.left = ArtistRect.right + (10*ScaleOffset)
             LyricsRect.left = WIDTH - LyricsRect.width
             
-            MessageRect.top = HEIGHT - (MessageRect.height + DurationRect.height)
-            ArtistRect.top = MessageRect.bottom - (ArtistRect.height-ArtistRect.height/2-(10 * ScaleOffset))
+            TitleRect.top = HEIGHT - (TitleRect.height + DurationRect.height + (20*ScaleOffset))
+            ArtistRect.top = TitleRect.bottom - (ArtistRect.height-ArtistRect.height/2-(10 * ScaleOffset))
             DurationRect.top = ArtistRect.top + (ArtistRect.height/2) - (DurationRect.height/2)
-            LyricsRect.top = HEIGHT - LyricsRect.height - (20 * ScaleOffset)
+            LyricsRect.top = HEIGHT - LyricsRect.height - (20)
             
-            screen.blit(MessageText  ,  MessageRect)
+            screen.blit(TitleText  ,  TitleRect)
             screen.blit(ArtistText   ,  ArtistRect)
             screen.blit(DurationText ,  DurationRect)
             screen.blit(LyricsText   ,  LyricsRect)

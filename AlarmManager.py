@@ -21,6 +21,9 @@ class Alarm():
     def getAlarmTone(self):
         return self.Tone
     
+    def setScaleOffset(self,s):
+        self.Tone.getTone().setScaleOffset(s)
+    
     def setAlarmTone(self, lightTiming = None , vibratorTiming = None, SpeakerTiming = None):
         if lightTiming != None:
             self.Tone.setLightTiming(lightTiming)

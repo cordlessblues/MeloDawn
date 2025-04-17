@@ -17,6 +17,7 @@ class MidiPlayer:
     def __init__(self, midi_file):
         self.midi_file = midi_file
         self.midi = mido.MidiFile(midi_file)
+        self.midi_out = None
         self.ticks_per_beat = self.midi.ticks_per_beat
         self.default_tempo = 500000  # microseconds per quarter note
         self.tempo = self.default_tempo
@@ -78,6 +79,8 @@ class MidiPlayer:
                     continue
                 finally:
                     break
+        if self.midi_out == None:
+            self.midi_out = midi.Output(0)
 
         self.precompute_events()
 
