@@ -178,10 +178,10 @@ class Ringtone:
                     # if color list is zero allocate the dynamic color instance
                     colorvalue=self.TextColor[_ % len(self.TextColor)] #assign all colors in an instance
                     self.brickColors.append(DynamicColor(colorvalue, blendColors(colorvalue,(0,0,0),25/100)))
-
+            
             for i, trackActive in enumerate(self.MidiPlayer.getTrackState()):  
                 #print(len(self.brickColors))
-                brickHeight = 20 
+                brickHeight = 20 * self.ScaleOffset
                 x = i * brickWidth  
                 y = Screen.get_height() - brickHeight
 

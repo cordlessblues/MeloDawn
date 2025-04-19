@@ -69,7 +69,7 @@ def fetchCalData():
         e = Calevents[i]
         output.append(
             assignment(
-                textwrap.shorten(e.summary.split("[")[0].strip().capitalize(),40,placeholder=" [...]"),
+                textwrap.shorten(e.summary.split("[")[0].strip().capitalize(),28,placeholder=" [...]"),
                 e.summary.split("[")[1].split("-")[0].strip().capitalize(),
                 e.end.date()
                 )

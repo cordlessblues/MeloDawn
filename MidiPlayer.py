@@ -131,7 +131,7 @@ class MidiPlayer:
                     lyric_text = msg.text
 
                     # Check if this is a new section (e.g., verse, chorus)
-                    if lyric_text.startswith("@"):
+                    if lyric_text.startswith("\\") or lyric_text.startswith("@"):
                         self.currentLyric = ""  # Clear previous lyrics
 
                     # Clean up the lyric text

@@ -130,5 +130,41 @@
         "LightTrack"     :  7,
         "VibratorTrack"  :  9,
         "Volume"         :  0.5
+    },
+    "11":{
+        "Name"           :  "Highway To Hell",
+        "Artist"         :  "ACDC",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/HighwayToHell.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  7,
+        "VibratorTrack"  :  9,
+        "Volume"         :  0.5
+    },
+    "12":{
+        "Name"           :  "Pirates Of The Caribbean",
+        "Artist"         :  "idfk",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/PiratesOfTheCaribbean.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  7,
+        "VibratorTrack"  :  9,
+        "Volume"         :  0.5
+    },
+    "13":{
+        "Name"           :  "ThunderStruck",
+        "Artist"         :  "idfk",
+        "Soundfont"      :  "gm.sf2",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/Thunderstruck.mid",
+        "VocalTrackType" :  "None",
+        "VocalsFilePath" :  "",
+        "SideTrackDelay" :  0.0,
+        "LightTrack"     :  7,
+        "VibratorTrack"  :  9,
+        "Volume"         :  0.5
     }
 }

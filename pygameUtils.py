@@ -1,5 +1,9 @@
 import math
 import pygame
+import PIL 
+from PIL import Image
+from PIL import ImageFilter
+from ColorUtils import *
 
 def get_points_on_edge(x, y, s, r, points_per_side, points_per_corner):
     Output = []
@@ -89,3 +93,31 @@ def CalculateLineThickness(current_second, max_value=255, num_lines=60):
         Values.append(value)
     
     return Values
+
+def Bloom(blurSize: int, surface: pygame.Surface):
+    width, height = surface.get_size()
+    small_size = (width // 2, height // 2)
+
+    # Scale down the surface for faster blur processing
+    resized = pygame.transform.smoothscale(surface, small_size)
+
+    # Convert to a string of bytes
+    img_str = pygame.image.tostring(resized, "RGB", False)
+
+    # Create a PIL image from the byte string, using the correct size
+    im = Image.frombytes("RGB", small_size, img_str)
+
+    # Apply Gaussian blur using PIL
+    im = im.filter(ImageFilter.GaussianBlur(blurSize))
+
+    # Convert the blurred PIL image back to bytes
+    blurred_str = im.tobytes()
+
+    # Create a new Pygame surface from the blurred bytes
+    blurred_surface = pygame.image.fromstring(blurred_str, small_size, "RGB")
+
+    # Scale the blurred surface back up to the original size
+    final = pygame.transform.smoothscale(blurred_surface, (width, height))
+
+    # Blend the blurred image back onto the original surface using additive blending
+    surface.blit(final, (0, 0), special_flags=pygame.BLEND_RGB_ADD)

@@ -11,18 +11,18 @@ from CalendarManager import *
 from ColorUtils import *
 from AlarmManager import *
 from MidiManager import *
-
+from TouchManager import *
 pygame.init()
 
 
 # Screen size
 WIDTH = 800
-widthScale = WIDTH / 1920
-print(f"widthScale: {widthScale}")
 HEIGHT = 480
+widthScale = WIDTH / 1920
 heightScale = HEIGHT / 1080
+ScaleOffset = min(widthScale, heightScale)
+print(f"widthScale: {widthScale}")
 print(f"heightScale: {heightScale}")
-ScaleOffset = min(widthScale, heightScale) 
 print(f"ScaleOffset: {heightScale}")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AlarmClock")
@@ -39,11 +39,11 @@ TEAL = (255/(8*1.5),255/1.5,255/1.5)
 
 # Clock parameters
 scale = 700  * ScaleOffset 
-radius = 30  * ScaleOffset
+radius = 70  * ScaleOffset
 offset = 100 * ScaleOffset
 center_x, center_y = (WIDTH // 2), (HEIGHT // 2)
 offset_x, offset_y = (WIDTH // 4.2), 0 
-points_per_corner = 0
+points_per_corner = 3
 points_per_side = 15 - points_per_corner
 lineWidth = round(10 * ScaleOffset)
 lineRadius = 5 
@@ -118,7 +118,7 @@ EndPoints   = get_points_on_edge(
     points_per_corner
 )
 
-
+touch = TouchInput(screen)
 
 FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
 clockLargeFont     =  Font(FontPath, ( round((12 * 12) * ScaleOffset)  ))
@@ -132,12 +132,18 @@ vibratorColor = DynamicColor( 0.0, 0.0, ClockColor.getColor(), ClockColor.getCol
 speakerColor  = DynamicColor( 0.0, 0.0, ClockColor.getColor(), ClockColor.getColor())
 lightColor    = DynamicColor( 0.0, 0.0, ClockColor.getColor(), ClockColor.getColor())
 
+bloom = True
+bloomRadius= 2
 #MARK: mainLoop
 while running:
-    for event in pygame.event.get():
+    PygameEvents = pygame.event.get()
+    for event in PygameEvents:
         if event.type == pygame.QUIT:
             running = False
     
+    widthScale  = screen.get_rect().width  / 1920
+    heightScale = screen.get_rect().height / 1080
+    ScaleOffset = min(widthScale, heightScale)
     
     
     t = pygame.time.get_ticks()
@@ -145,14 +151,6 @@ while running:
     deltaTime = (t - getTicksLastFrame) / 1000.0
     screen.fill((0, 0, 0, 0))  # Fill the screen with black
     
-    left, middle, right = pygame.mouse.get_pressed()
-    
-    if left and wasLeft!=left:
-        LowLightActive=not LowLightActive
-    if right and wasRight!=right:
-        for a in alarms:
-            if a.IsActive():
-                a.Snooze()
     
     current_time = datetime.now()
     
@@ -195,7 +193,9 @@ while running:
                 if CalReset == False:
                     CalReset = True
                     for c in calData[i].getSubjectColors():
-                        c.setTargetColor(blendColors(c.getOrginalTargetColor(),blendColors(TEAL,(0,0,0),80/100),50/100),True)
+                        c.setTargetColor(blendColors(c.getOrginalTargetColor(),(0,0,0),40/100),True)
+                    calData[i].getSubjectColors()[3].setTargetColor(BLACK,True)
+                    #calData[i].getSubjectColors()[2].setTargetColor(blendColors(BLACK,WHITE,50/100),True)
             else:
                 if CalReset == False:
                     CalReset = True
@@ -217,19 +217,21 @@ while running:
             
             
             calWidth = max(calWidth,TextRectSubjectNames[i].width,TextRectAssignmentNames[i].width,TextRectDueDate[i].width)
+            if calWidth <(TextRectDueDate[i].width+TextRectSubjectNames[i].width):
+                calWidth = TextRectDueDate[i].width+TextRectSubjectNames[i].width
             if i-1 >= 0: TextRectSubjectNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectSubjectNames[i].width/2 ,(TextRectDueDate[i-1].bottom + objectSpacing))
             else: TextRectSubjectNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectSubjectNames[i].width/2 ,((150*ScaleOffset) + textSpacing))
             TextRectAssignmentNames[i].center = (WIDTH/2 + WIDTH/16 + TextRectAssignmentNames[i].width/2 , (TextRectSubjectNames[i].bottom+textSpacing))
-            Background = pygame.draw.rect(screen, calData[i].getSubjectColors()[3].getColor(), (TextRectSubjectNames[i].left - 10, TextRectSubjectNames[i].top,  calWidth+25,  TextRectAssignmentNames[i].bottom - TextRectSubjectNames[i].top), border_radius=round(5* ScaleOffset*2))
+            Background = pygame.draw.rect(screen, calData[i].getSubjectColors()[3].getColor(), (TextRectSubjectNames[i].left - 20, TextRectSubjectNames[i].top,  calWidth+25,  TextRectAssignmentNames[i].bottom - TextRectSubjectNames[i].top), border_radius=round(5* ScaleOffset*2))
             TextRectDueDate[i].topleft = (Background.right - TextRectDueDate[i].width-5,(Background.top))
             
             #MARK: CalBlit
             
-            if calData[i].getSubjectColors()[1].getColor() != (0,0,0):
+            if calData[i].getSubjectColors()[0].getColor() != (0,0,0):
                 screen.blit(TextSubjectNames[i],TextRectSubjectNames[i])
-            if calData[i].getSubjectColors()[2].getColor() != (0,0,0):
+            if calData[i].getSubjectColors()[1].getColor() != (0,0,0):
                 screen.blit(TextAssignmentNames[i],TextRectAssignmentNames[i])
-            if calData[i].getSubjectColors()[3].getColor() != (0,0,0):
+            if calData[i].getSubjectColors()[2].getColor() != (0,0,0):
                 screen.blit(TextDueDate[i],TextRectDueDate[i])
             
 
@@ -269,7 +271,7 @@ while running:
         if LowLightActive:
             LineColors[i].setTargetColor((CalculateLineThickness(Seconds)[i]/8,CalculateLineThickness(Seconds)[i]/2,CalculateLineThickness(Seconds)[i]/2),True)
         else:
-            LineColors[i].setTargetColor(interpolateColor(CalculateLineThickness(Seconds)[i],255,ORANGE,BLUE),True)
+            LineColors[i].setTargetColor(interpolateColor(CalculateLineThickness(Seconds)[i],255,ORANGE,BLUE),False)
         
         if NextIndex-1 != Seconds:
             for b in range(len(LineColors)):
@@ -298,6 +300,7 @@ while running:
             a.setScaleOffset(ScaleOffset)
             for color, rect in a.getAlarmTone().getTone().getBricks():
                 pygame.draw.rect(screen, color, rect)
+                
         
         
             Title = a.getTitle()
@@ -320,10 +323,10 @@ while running:
             DurationRect.left = ArtistRect.right + (10*ScaleOffset)
             LyricsRect.left = WIDTH - LyricsRect.width
             
-            TitleRect.top = HEIGHT - (TitleRect.height + DurationRect.height + (20*ScaleOffset))
+            TitleRect.top = HEIGHT - (TitleRect.height + DurationRect.height)
             ArtistRect.top = TitleRect.bottom - (ArtistRect.height-ArtistRect.height/2-(10 * ScaleOffset))
             DurationRect.top = ArtistRect.top + (ArtistRect.height/2) - (DurationRect.height/2)
-            LyricsRect.top = HEIGHT - LyricsRect.height - (20)
+            LyricsRect.top = HEIGHT - LyricsRect.height - (20*ScaleOffset)
             
             screen.blit(TitleText  ,  TitleRect)
             screen.blit(ArtistText   ,  ArtistRect)
@@ -335,15 +338,37 @@ while running:
     
     #MARK: ColorUpdates
     ClockColor.Update(    1/10, deltaTime)
-    #vibratorColor.Update( 5,    deltaTime)
-    #speakerColor.Update(  5,    deltaTime)
-    #lightColor.Update(    5,    deltaTime)
     
     getTicksLastFrame = t
-    wasLeft, wasMiddle, wasRight, = left, middle, right
     wasLowLightActive = LowLightActive
     
-    pygame.time.Clock().tick(30)
+    
+    
+    
+    
+    #MARK: touch input
+    touch.update(PygameEvents)
+    
+    for gesture in touch.gestures:
+        match gesture:
+            case "swipe_up":
+                print("vol_up")
+                bloom = True
+            case "swipe_down":
+                print("vol_down")
+                bloom = False
+            case "rotate_ccw":
+                print("Brightness_down")
+                bloomRadius-=1
+            case "rotate_cw":
+                print("Brightness_up")
+                bloomRadius+=1
+            case "double_tap":
+                LowLightActive=not LowLightActive
+                    
+    #touch.draw_debug()
+    if bloom: Bloom(bloomRadius,screen)
+    pygame.time.Clock().tick(60)
     # Update displa
     pygame.display.flip() 
     
