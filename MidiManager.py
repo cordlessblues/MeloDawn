@@ -222,7 +222,7 @@ class Ringtone:
         
         Seconds = int(self.MidiPlayer.getDuration() % 60)
         Minutes = int((self.MidiPlayer.getDuration() // 60) % 60)
-        return(f"{Minutes}:{"{:02d}".format(Seconds)}") 
+        return f"{Minutes}:{Seconds:02d}"
     
     def getArtist(self):
         return self.Artist
