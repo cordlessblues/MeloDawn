@@ -215,7 +215,8 @@ class Ringtone:
         elapsedTime = time.time() - self.startTime
         Seconds = int(elapsedTime  %  60)
         Minutes = int((elapsedTime // 60) % 60)
-        return(f"{Minutes}:{"{:02d}".format(Seconds)}") 
+        return f"{Minutes}:{Seconds:02d}"
+
     
     def GetSongDuration(self):
         
