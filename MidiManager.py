@@ -197,7 +197,7 @@ class Ringtone:
 
 
                 self.bricks.append(
-                    (Currentcolor.getColor(), (x, y, brickWidth, brickHeight))
+                    (Currentcolor, (x, y, brickWidth, brickHeight))
                 )
                 Currentcolor.Update()
 
@@ -205,6 +205,10 @@ class Ringtone:
 
     def getName(self):
         return self.Name
+    
+    def Stop(self):
+        self.IsPlaying=False
+        self.MidiPlayer.stop()
     
     def GetCurrentSongPos(self):
         elapsedTime = time.time() - self.startTime

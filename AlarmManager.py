@@ -71,8 +71,9 @@ class Alarm():
         self.Deactivate()
 
     def Deactivate(self):
-        self.Active = False
-        self.getAlarmTone().getTone().Stop()
+        if self.Active:
+            self.Active = False
+            self.getAlarmTone().getTone().Stop()
 
     def IsActive(self):
         return self.Active

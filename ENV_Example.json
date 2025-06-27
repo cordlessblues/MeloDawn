@@ -5,8 +5,11 @@
             "FixApple":false
         },
         "IMeanAnything":{
-            "URL":"https://calendar.com/example.ics",
+            "URL":"https://calendar.com/sample.ics",
             "FixApple":false
         }
+    },
+    "WeatherAPI":{
+        "Key":"PutYoKeyHere"
     }
 }

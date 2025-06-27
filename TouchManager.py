@@ -182,5 +182,5 @@ if __name__ == '__main__':
         screen.fill((30, 30, 30))
         touch.draw_debug()
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(330)
     pygame.quit()

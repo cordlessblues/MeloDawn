@@ -64,12 +64,14 @@ def fetchCalData():
         for item in calData["Calender"]:
             print(item)
             Calevents += events(url = calData["Calender"][item]["URL"], fix_apple= calData["Calender"][item]["FixApple"])
+        print(Calevents)
     # Parse the data
     for i in range(len(Calevents)):
         e = Calevents[i]
+        print(e)
         output.append(
             assignment(
-                textwrap.shorten(e.summary.split("[")[0].strip().capitalize(),28,placeholder=" [...]"),
+                textwrap.shorten(e.summary,34,placeholder=" [...]"),
                 e.summary.split("[")[1].split("-")[0].strip().capitalize(),
                 e.end.date()
                 )
@@ -92,13 +94,13 @@ def fetchCalData():
         # 0 == text one
         # 1 == text two
         # 2 == text three
-        # 3 == Backgrounc
-        # 4 == Bat
-        output[i].setSubjectColor(0, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 70/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 70/100  ), orginalBlendFactor = -abs((1 / 5 * 2.5 ) + i / 50), blendFactor = -abs((1 / 5 * 2.5 ) + i / 50))
-        output[i].setSubjectColor(1, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 60/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 60/100  ), orginalBlendFactor = -abs((1 / 5 * 2.0 ) + i / 50), blendFactor = -abs((1 / 5 * 2.0 ) + i / 50))
-        output[i].setSubjectColor(2, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 50/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 50/100  ), orginalBlendFactor = -abs((1 / 5 * 1.5 ) + i / 50), blendFactor = -abs((1 / 5 * 1.5 ) + i / 50))
-        output[i].setSubjectColor(3, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 90/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 90/100  ), orginalBlendFactor = -abs((1 / 5 * 1.0 ) + i / 50), blendFactor = -abs((1 / 5 * 1.0 ) + i / 50))
-        output[i].setSubjectColor(4, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 75/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 75/100  ), orginalBlendFactor = -abs((1 / 5 * 0.5 ) + i / 50), blendFactor = -abs((1 / 5 * 0.5 ) + i / 50))
+        # 3 == Background
+        # 4 == Bar
+        output[i].setSubjectColor(0, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 50/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 70/100  ), orginalBlendFactor = -abs((1 / 5 * 2.5 ) + i / 50), blendFactor = -abs((1 / 5 * 2.5 ) + i / 50))
+        output[i].setSubjectColor(1, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 40/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 60/100  ), orginalBlendFactor = -abs((1 / 5 * 2.0 ) + i / 50), blendFactor = -abs((1 / 5 * 2.0 ) + i / 50))
+        output[i].setSubjectColor(2, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 30/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 50/100  ), orginalBlendFactor = -abs((1 / 5 * 1.5 ) + i / 50), blendFactor = -abs((1 / 5 * 1.5 ) + i / 50))
+        output[i].setSubjectColor(3, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 70/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 90/100  ), orginalBlendFactor = -abs((1 / 5 * 1.0 ) + i / 50), blendFactor = -abs((1 / 5 * 1.0 ) + i / 50))
+        output[i].setSubjectColor(4, color = (0,0,0), targetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 55/100  ), orginalTargetColor = ColorUtils.blendColors((255, 255, 255), SubjectColor, 75/100  ), orginalBlendFactor = -abs((1 / 5 * 0.5 ) + i / 50), blendFactor = -abs((1 / 5 * 0.5 ) + i / 50))
     return(output)
 
 if __name__ =="__main__":

@@ -1,6 +1,8 @@
 import mido
+import os
 import pygame as pg
 import pygame.midi as midi
+import subprocess
 import time
 import threading
 from ColorUtils import *  # Assuming this is the correct import for the DynamicColor class
@@ -14,6 +16,8 @@ SCROLL_SPEED = 1
 MAX_MESSAGES = 15
 
 class MidiPlayer:
+    def _MIDISTART(yeet):
+        subprocess.run("/home/carl/test.sh",executable="/usr/bin/bash",shell=True)
     def __init__(self, midi_file):
         self.midi_file = midi_file
         self.midi = mido.MidiFile(midi_file)
@@ -28,7 +32,10 @@ class MidiPlayer:
         self.font = None
         self.running = False
         self.events = []  # Precomputed events
-
+        #self.audioThread = threading.Thread(target=self._MIDISTART)
+        #self.audioThread.start()
+        self.MidiProcessor = None
+        self.activeTracks = [False] * len(self.midi.tracks)
         # Color Palette
         self.colorPallete = {
             "Mauve": (203, 166, 247),
@@ -59,6 +66,9 @@ class MidiPlayer:
         pg.init()
         midi.init()
 
+
+        # MIDI DEVICE OUTPUT INIT
+        time.sleep(1)
         for i in range(1,midi.get_count()):
             print(f"i:{i} | deviceinfo: {midi.get_device_info(i)[3]}")
             if midi.get_device_info(i)[3] == 1:
@@ -84,6 +94,8 @@ class MidiPlayer:
 
         self.precompute_events()
 
+    
+    
     def precompute_events(self):
         self.events = []
         tempo = self.default_tempo
@@ -122,24 +134,36 @@ class MidiPlayer:
                     break
                 # Wait until the appropriate time to play the next event
                 wait_time = abs_time - (time.perf_counter() - start_time)
+                print(msg.type)
                 if wait_time > 0:
                     time.sleep(wait_time)
+                if msg.type == "end_of_track":
+                    self.activeTracks[track_index] = False
+                else:
+                    if not self.activeTracks[track_index]: self.activeTracks[track_index] = True
                 if msg.type == 'set_tempo':
                     self.tempo = msg.tempo
                     continue
-                if msg.type == 'text':
+                if msg.type == "lyrics":
                     lyric_text = msg.text
-
+                    
                     # Check if this is a new section (e.g., verse, chorus)
                     if lyric_text.startswith("\\") or lyric_text.startswith("@"):
                         self.currentLyric = ""  # Clear previous lyrics
-
+                    lyric_text = lyric_text.replace("@T ", "TITLE: ").replace("@L", "LANG: ").replace("\\", "").replace("@","").replace(" ?","?")
+                    
+                    
                     # Clean up the lyric text
-                    lyric_text = lyric_text.replace("@T ", "TITLE: ").replace("@L", "LANG: ").replace("\\", "")
+                    
 
                     # Append the cleaned-up lyric text to the current lyric
                     self.currentLyric += lyric_text
-
+                    lyricLen = len(self.currentLyric)
+                    if lyricLen >= 36:
+                        self.currentLyric = lyric_text
+                        print("cleared due to char limit")
+                    print(lyricLen)
+                    
                     # Split lyric if / in string
                     if "/" in self.currentLyric:
                         self.currentLyric = self.currentLyric.split("/")[1]
@@ -167,6 +191,8 @@ class MidiPlayer:
                             self.midi_out.write_short(0xC0 | msg.channel, msg.program)
                     except Exception as e:
                         print(f"Error sending MIDI: {e}")
+                if len(self.activeTracks) < 0:
+                    self.running = False
             self.running = False
             if self.midi_out:
                 del self.midi_out
@@ -209,7 +235,7 @@ class MidiPlayer:
 
             # Append the brick (a filled rectangle with current color)
             self.bricks.append(
-                (current_color, (x, y, brick_width, brick_height))
+                (dynamic_color, (x, y, brick_width, brick_height))
             )
 
     def stop(self):
@@ -217,7 +243,7 @@ class MidiPlayer:
 
     def getDuration(self): return self.events[len(self.events)-1][0]
     
-    def getCurrentLyric(self): return self.currentLyric
+    def getCurrentLyric(self): return ''.join(char for char in self.currentLyric if char != '\x00')
     def run(self):
         self.play()
         clock = pg.time.Clock()

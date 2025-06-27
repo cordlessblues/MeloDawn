@@ -35,9 +35,10 @@ def blendColors(color1, color2, blend_factor):
     return blended_color
 
 class DynamicColor():
-    def __init__(self, OBF = None,BF=0.0,OTC = None, TC=(0,0,0), C=(0,0,0)):
+    def __init__(self, OBF = None,BF=0.0,OTC = None, TC=(0,0,0,1), C=(0,0,0,1)):
         self.color = C
         self.targetColor = TC
+        self.Dirty = True
         if OTC == None:
             self.orginalTargetColor = TC
         else:
@@ -76,9 +77,16 @@ class DynamicColor():
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"{p}color:                {self.color} \n{p}orginalTargetColor:   {self.orginalTargetColor} \n{p}targetColor:          {self.targetColor} \n{p}orginalBlendFactor:   {self.orginalBlendFactor} \n{p}blendFactor:          {self.blendFactor}")
     
+    def isDirty(self)->bool:
+        return self.Dirty
+    
     def Update(self,updateRate = (1/5),deltaTime=1.0):
         self.blendFactor = min(self.blendFactor + updateRate * deltaTime,1.0)
         self.blendColor(self.blendFactor)
+        if self.color == self.targetColor:
+            self.Dirty = False
+        else:
+            self.Dirty = True
         
     def Reset(self):
         self.blendFactor = self.getOrginalBlendFactor()

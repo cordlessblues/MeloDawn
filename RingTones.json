@@ -39,9 +39,9 @@
         "Name"           :  "Deja-Vu",
         "Artist"         :  "Dave Rogers",
         "Soundfont"      :  "Arachno.sf2",
-        "FilePath"       :  "python/AlarmClock/MidiFiles/DeJaVu.mid",
-        "VocalTrackType" :  "None",
-        "VocalsFilePath" :  "python/AlarmClock/MidiFiles/VocalTracks/DejaVu.mp3",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/DeJaVuNEW.mid",
+        "VocalTrackType" :  "Lyrics",
+        "VocalsFilePath" :  "lyrics",
         "SideTrackDelay" :  0.0,
         "LightTrack"     :  1,
         "VibratorTrack"  :  8,
@@ -117,7 +117,7 @@
         "SideTrackDelay" :  0.0,
         "LightTrack"     :  7,
         "VibratorTrack"  :  9,
-        "Volume"         :  0.5
+        "Volume"         :  1.0
     },
     "10":{
         "Name"           :  "Order (Ultrakill)",
@@ -132,39 +132,27 @@
         "Volume"         :  0.5
     },
     "11":{
-        "Name"           :  "Highway To Hell",
-        "Artist"         :  "ACDC",
+        "Name"           :  "The Death Of Gods Will",
+        "Artist"         :  "Arsi \"Hakita\" Patala",
         "Soundfont"      :  "gm.sf2",
-        "FilePath"       :  "python/AlarmClock/MidiFiles/HighwayToHell.mid",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/TheDeathofGodsWill.mid",
         "VocalTrackType" :  "None",
         "VocalsFilePath" :  "",
         "SideTrackDelay" :  0.0,
-        "LightTrack"     :  7,
-        "VibratorTrack"  :  9,
+        "LightTrack"     :  0,
+        "VibratorTrack"  :  0,
         "Volume"         :  0.5
     },
     "12":{
-        "Name"           :  "Pirates Of The Caribbean",
-        "Artist"         :  "idfk",
+        "Name"           :  "Holding Out For A Hero",
+        "Artist"         :  "I dunno",
         "Soundfont"      :  "gm.sf2",
-        "FilePath"       :  "python/AlarmClock/MidiFiles/PiratesOfTheCaribbean.mid",
+        "FilePath"       :  "python/AlarmClock/MidiFiles/HoldingOutForAHero.mid",
         "VocalTrackType" :  "None",
         "VocalsFilePath" :  "",
         "SideTrackDelay" :  0.0,
-        "LightTrack"     :  7,
-        "VibratorTrack"  :  9,
-        "Volume"         :  0.5
-    },
-    "13":{
-        "Name"           :  "ThunderStruck",
-        "Artist"         :  "idfk",
-        "Soundfont"      :  "gm.sf2",
-        "FilePath"       :  "python/AlarmClock/MidiFiles/Thunderstruck.mid",
-        "VocalTrackType" :  "None",
-        "VocalsFilePath" :  "",
-        "SideTrackDelay" :  0.0,
-        "LightTrack"     :  7,
-        "VibratorTrack"  :  9,
+        "LightTrack"     :  0,
+        "VibratorTrack"  :  0,
         "Volume"         :  0.5
     }
 }
