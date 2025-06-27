@@ -4,6 +4,7 @@ import datetime
 import pygame
 import time
 import textwrap
+from pathlib import Path
 
 #Carls Imports
 from pygameUtils import *
@@ -15,6 +16,7 @@ from TouchManager import *
 from WidgetManager import *
 pygame.init()
 
+BASE_DIR = Path(__file__).resolve().parent
 
 
 # Colors
@@ -73,7 +75,7 @@ class ClockWidget(Widget):
             self.points_per_corner
         )
         
-        self.FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
+        self.FontPath = BASE_DIR / "JetBrainsMonoNerdFont-Regular.ttf"
         self.clockLargeFont = Font(self.FontPath, 12 * round(12 * self.scaleFactor))
         self.clockSmallFont = Font(self.FontPath, 12 * round(6  * self.scaleFactor) )
     

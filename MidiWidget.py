@@ -20,13 +20,16 @@ ORANGE = (255, 165, 0)
 GREEN = (25,255,100)
 TEAL = (255/(8*1.5),255/1.5,255/1.5)
 
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+
 class MidiWidget(Widget):
     def __init__(self,BaseRes):
         super().__init__(BaseRes)
         #midi specific vars
         self.renderSurface = pygame.surface.Surface((BaseRes,(BaseRes//8)),pygame.SRCALPHA)
-        self.alarms = FetchAlarms("python/AlarmClock/Alarms.json","python/AlarmClock/RingTones.json")
-        self.FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
+        self.alarms = FetchAlarms(BASE_DIR / "Alarms.json",BASE_DIR / "RingTones.json")
+        self.FontPath = BASE_DIR / "JetBrainsMonoNerdFont-Regular.ttf"
         #fonts
         self.TitleFont        =  Font(self.FontPath, (12 * 3 ))
         self.ArtistFont       =  Font(self.FontPath, (12 * 3 ))

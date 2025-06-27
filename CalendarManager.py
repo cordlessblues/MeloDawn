@@ -2,6 +2,8 @@ import textwrap
 from icalevents.icalevents import events
 import ColorUtils
 import json
+
+
 class assignment():
     def __init__(self, name, subject,DueDate):
         self.name = name
@@ -57,9 +59,11 @@ class assignment():
             self.subjectColors[c].printInfo(f"  {p}")    
 
 def fetchCalData():
+    from pathlib import Path
+    BASE_DIR = Path(__file__).resolve().parent
     output=[]
     Calevents = []
-    with open("/home/carl/.CodeProjects/python/AlarmClock/ENV.json", "r") as f:
+    with open(BASE_DIR / "ENV.json", "r") as f:
         calData = json.load(f)
         for item in calData["Calender"]:
             print(item)

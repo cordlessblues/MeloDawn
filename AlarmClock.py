@@ -13,6 +13,18 @@ from ClockWidget import *
 from CalendarWidget import *
 from MidiWidget import *
 from WeatherWidget import *
+from pathlib import Path
+
+# Get the directory of the current script
+BASE_DIR = Path(__file__).resolve().parent
+FontPath = BASE_DIR / "JetBrainsMonoNerdFont-Regular.ttf"
+print(BASE_DIR)
+
+# Load Font
+
+
+
+
 
 pygame.init()
 
@@ -38,7 +50,6 @@ wasLowLightActive = False
 
 touch = TouchInput(screen)
 
-FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
 
 widget_heights = {
     'clock': 512 - 128,
@@ -66,8 +77,8 @@ WidgetsRight  = []
 
 WidgetsLeft.append(clock)
 
-WidgetsRight.append(weather)
 WidgetsRight.append(cal)
+WidgetsRight.append(weather)
 
 
 Widgets.append(WidgetsLeft)
@@ -90,7 +101,7 @@ running = True
 GameClock = pygame.time.Clock()
 
 scroll_position = 0
-scroll_speed = 10 
+scroll_speed = 10
 
 
 # Main Loop
@@ -99,7 +110,7 @@ while running:
     for event in PygameEvents:
         if event.type == pygame.QUIT:
             running = False
-    
+
     t = GameClock.get_time()
     widthScale = screen.get_rect().width / 1920
     heightScale = screen.get_rect().height / 1080
@@ -118,8 +129,8 @@ while running:
             currentWidget.update(deltaTime)
             if currentWidget.NeedsUpdate():
                 currentWidget.render(screen, currentWidget.rect)
-            pygame.display.update(currentWidget.rect)
-    
+                pygame.display.update(currentWidget.rect)
+
     mid.update(deltaTime)
     print(weather.rect)
     LeftTop.update(deltaTime)
@@ -129,12 +140,12 @@ while running:
 
     mid.rect.top = clock.rect.bottom
 
-    
+
     if mid.active != mid.wasActive and mid.active:
         LeftTop.set_target(0 if mid.active else HEIGHT // 2 - clock.rect.height // 2)
         RightTop.set_target(0 if mid.active else HEIGHT // 2 - clock.rect.height // 2)
-    
-    if mid.active: 
+
+    if mid.active:
         mid.render(screen,mid.rect)
         pygame.display.update(mid.rect)
 

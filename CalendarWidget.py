@@ -5,6 +5,7 @@ import threading
 import datetime
 import pygame
 import time
+from pathlib import Path
 
 #Carls Imports
 from pygameUtils import *
@@ -24,6 +25,7 @@ ORANGE = (255, 165, 0)
 GREEN = (25,255,100)
 TEAL = (255/(8*1.5),255/1.5,255/1.5)
 
+BASE_DIR = Path(__file__).resolve().parent
 
 class CalenderWidget(Widget):
     def __init__(self,baseRes):
@@ -32,7 +34,7 @@ class CalenderWidget(Widget):
         self.wasLowLightActive = False
         self.renderSurface = pygame.surface.Surface((baseRes,baseRes),pygame.SRCALPHA)
         #copyed and pasted from old main script
-        FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
+        FontPath = BASE_DIR / "JetBrainsMonoNerdFont-Regular.ttf"
         self.CalLargeFont       =  Font(FontPath, ( round((12 * 2 ) * self.scaleFactor*2) ))
         self.CalSmallFont       =  Font(FontPath, ( round((12 * 1 ) * self.scaleFactor*2) ))
         

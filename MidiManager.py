@@ -8,14 +8,15 @@ import math
 from ColorUtils import *
 import threading
 from MidiPlayer import *
-
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 
 class Ringtone:
     def __init__(self,data):
         self.data = data
         self.Title = data["Name"]
         self.Artist = data["Artist"]
-        self.filepath = data["FilePath"]
+        self.filepath = BASE_DIR / str(data["FilePath"])
         self.MidiPlayer = None
         self.ScaleOffset = 1
         self.SideTrackEnabled = False

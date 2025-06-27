@@ -9,7 +9,8 @@ from pprint import pprint
 import json
 from WidgetManager import *
 from pygameUtils import *
-
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 class WeatherWidget(Widget):
     def __init__(self, baseRes, locat):
         super().__init__(baseRes)
@@ -18,7 +19,7 @@ class WeatherWidget(Widget):
         self.data = None  # Initial data is None
         self.oldData = None
         self.locat = locat
-        self.FontPath = "python/AlarmClock/JetBrainsMonoNerdFont-Regular.ttf"
+        self.FontPath = BASE_DIR / "JetBrainsMonoNerdFont-Regular.ttf"
         self.IconFont = Font(self.FontPath, 6 * 60)
         self.LocationFont = Font(self.FontPath, 6 * 3)
         self.HumidityFont = Font(self.FontPath, 6 * 2)

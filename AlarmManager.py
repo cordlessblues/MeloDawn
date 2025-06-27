@@ -177,6 +177,7 @@ class AlarmTone():
         self.active = False
 
 def FetchAlarms (FilePath,RingPath):
+
     """Fetches Alarms from given filepath
 
     Args:
@@ -197,6 +198,7 @@ def FetchAlarms (FilePath,RingPath):
                 if str(currentAlarm["AlarmTone"]) == "-1":
                     CurrentRingTone= RingData[str( randint( 0, ( len( RingData ) - 1 ) ) ) ]
                 else: CurrentRingTone= RingData[str(currentAlarm["AlarmTone"])]
+                print(CurrentRingTone)
                 Alarms.append(
                     Alarm(
                         TimeCode, 
@@ -213,7 +215,9 @@ def FetchAlarms (FilePath,RingPath):
 
 
 if __name__ =="__main__":
-    alarms = FetchAlarms("python/AlarmClock/Alarms.json")
+    from pathlib import Path
+    BASE_DIR = Path(__file__).resolve().parent
+    alarms = FetchAlarms(BASE_DIR / "Alarms.json")
     while True:
         alarms[0].Update()
         pygame.time.tick(30)
