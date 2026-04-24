@@ -1,0 +1,12 @@
+.ENV.json
+Widgets/midi/Resources/*
+Widgets/*/__pycache__
+Widgets/__pycache__
+.qt
+.vscode
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CmakeLists.txt
+qmldir
