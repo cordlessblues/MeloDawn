@@ -4,7 +4,7 @@ import QtQuick.Window
 Item {
     id: calendar
 
-    property var backend
+    property var backend: null
 
     anchors.fill: parent
 
@@ -14,7 +14,9 @@ Item {
         anchors.fill: parent
         spacing: 8
         clip: true
-        model: null // calendar backend is slow.
+        
+        // Declarative reactive binding: automatically updates the moment 'backend' or 'backend.model' becomes available
+        model: (calendar.backend && calendar.backend.model) ? calendar.backend.model : null
         reuseItems: true
 
         delegate: Item {
@@ -23,7 +25,6 @@ Item {
 
             Rectangle {
                 id: colorBar
-
                 height: parent.height
                 width: 8
                 radius: 4
@@ -34,7 +35,6 @@ Item {
 
             Text {
                 id: title
-
                 text: model.title
                 font.family: "Jetbrains Mono NF"
                 font.pixelSize: 28
@@ -45,7 +45,6 @@ Item {
 
             Text {
                 id: subject
-
                 text: model.subject
                 font.family: "Jetbrains Mono NF"
                 font.pixelSize: 24
@@ -56,7 +55,6 @@ Item {
 
             Text {
                 id: dueDate
-
                 text: model.dueDate
                 font.family: "Jetbrains Mono NF"
                 font.pixelSize: 24
@@ -65,27 +63,6 @@ Item {
                 anchors.rightMargin: 8
                 y: 0
             }
-
         }
-        Connections {
-            target: calendar
-
-            function onBackendChanged() {
-                if (calendar.backend && calendar.backend.model) {
-                    eventList.model = calendar.backend.model
-                } else {
-                    console.warn("[Calendar] backend missing model")
-                }
-            }
-        }
-        Connections {
-            target: backend ? backend.model : null
-
-            function onModelReset() {
-                eventList.model = backend.model
-            }
-        }
-
     }
-
 }

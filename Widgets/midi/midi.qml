@@ -12,7 +12,8 @@ Item {
         spacing: 0
 
         Repeater {
-            model: backendSafe
+            // FIX: Point the repeater model to the QAbstractListModel (`model`), not the backend object itself
+            model: backend && backend.model ? backend.model : null
 
             Rectangle {
                 property var baseColor: Qt.rgba(
@@ -62,45 +63,45 @@ Item {
         height: 50
         clip: true
 
-        Row {
-            id: lyricRow
-            spacing: 6
-            anchors.verticalCenter: parent.verticalCenter
+        // Row {
+        //     id: lyricRow
+        //     spacing: 6
+        //     anchors.verticalCenter: parent.verticalCenter
 
-            Behavior on x {
-                NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
-            }
+        //     Behavior on x {
+        //         NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+        //     }
 
-            Repeater {
-                id: lyricRepeater
-                model: backend.lyricsSegments
+        //     Repeater {
+        //         id: lyricRepeater
+        //         model: backend.lyricsSegments
 
-                delegate: Item {
-                    width: textItem.width
-                    height: textItem.height
+        //         delegate: Item {
+        //             width: textItem.width
+        //             height: textItem.height
 
-                    Text {
-                        id: textItem
-                        text: modelData
-                        font.pixelSize: 24
-                        font.bold: true
-                        color: "white"
+        //             Text {
+        //                 id: textItem
+        //                 text: modelData
+        //                 font.pixelSize: 24
+        //                 font.bold: true
+        //                 color: "white"
 
-                        x: 40
-                        opacity: 0
+        //                 x: 40
+        //                 opacity: 0
 
-                        // animate the bitch
-                        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-                        Behavior on opacity { NumberAnimation { duration: 150 } }
+        //                 // animate the bitch
+        //                 Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        //                 Behavior on opacity { NumberAnimation { duration: 150 } }
 
-                        Component.onCompleted: {
-                            // do thing
-                            x = 0
-                            opacity = 1
-                        }
-                    }
-                }
-            }
-        }
+        //                 Component.onCompleted: {
+        //                     // do thing
+        //                     x = 0
+        //                     opacity = 1
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 }

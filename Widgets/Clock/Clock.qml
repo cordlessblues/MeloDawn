@@ -2,9 +2,11 @@ import QtQuick
 
 Item {
     id: clock
+    anchors.fill: parent
 
     property var backend: null
-    property var backendSafe: backend || {}
+    // Fallback safely to empty object or fallback object structure
+    property var backendSafe: backend ? backend : { ampm: "AM", seconds: 0, time: "%H:%M:%S", date: "%A, %B %d" }
 
     property real tickHeight: 24
     property real tickWidth: tickHeight / 4
@@ -17,12 +19,14 @@ Item {
     property int effectivePaddingH: paddingH + tickWidth / 2
     property int effectivePaddingV: paddingV + tickHeight / 2
 
-    property color highlightColor: backendSafe.ampm === "AM" ? "white" : '#f9f4bd'
+    // Safe fallback check for ampm
+    property color highlightColor: (backendSafe && backendSafe.ampm === "AM") ? "white" : '#f9f4bd'
 
     Repeater {
         model: 60
         Rectangle {
-            property int currentSecond: backendSafe.seconds !== undefined ? backendSafe.seconds : 0
+            // Safe fallback check for seconds
+            property int currentSecond: (backendSafe && backendSafe.seconds !== undefined) ? backendSafe.seconds : 0
             property int distanceFromSeconds: (index - currentSecond + 60) % 60
             property real gradientFactor: 1 - distanceFromSeconds / 60
 
@@ -86,15 +90,13 @@ Item {
             radius: 4
             color: index === currentSecond ? clock.highlightColor : Qt.rgba(gradientFactor, 0.5, 1 - gradientFactor, 1)
             scale: index === currentSecond ? 1.5 : 1
+            
             Component.onCompleted: updatePosition()
+            
             Connections {
                 target: clock
-                function onWidthChanged() {
-                    updatePosition()
-                }
-                function onHeightChanged() {
-                    updatePosition()
-                }
+                function onWidthChanged() { updatePosition() }
+                function onHeightChanged() { updatePosition() }
             }
 
             transform: Rotation {
@@ -114,7 +116,7 @@ Item {
 
     Text {
         id: timeText
-        text: backendSafe.time !== undefined ? backendSafe.time : "%H:%M:%S"
+        text: (backendSafe && backendSafe.time !== undefined) ? backendSafe.time : "%H:%M:%S"
         anchors.centerIn: parent
         font.family: "Jetbrains Mono NF"
         font.pointSize: 48
@@ -123,7 +125,7 @@ Item {
 
     Text {
         id: dateText
-        text: backendSafe.date !== undefined ? backendSafe.date : "%A, %B %d"
+        text: (backendSafe && backendSafe.date !== undefined) ? backendSafe.date : "%A, %B %d"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: timeText.bottom
         anchors.topMargin: 8

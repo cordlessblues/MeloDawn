@@ -8,12 +8,12 @@ app = QApplication(sys.argv)
 engine = QQmlApplicationEngine()
 
 manager = WidgetManager("./Widgets")
-manager.load_widgets()
+manager.loadWidgets()
 
 engine.rootContext().setContextProperty("widgetManager", manager)
 
-qml_path = os.path.join(os.path.dirname(__file__), "Main.qml")
-engine.load(qml_path)
+qmlPath = os.path.join(os.path.dirname(__file__), "Main.qml")
+engine.load(qmlPath)
 
 if engine.rootObjects():
     window = engine.rootObjects()[0]

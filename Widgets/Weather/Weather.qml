@@ -3,158 +3,192 @@ import QtQuick.Controls
 
 Item {
     id: weather
-    width: 400
-    height: 600
+    anchors.fill: parent
+
     property var backend: null
-    property string fontFamily: "Jetbrains Mono NF"
+    property string fontFamily: "JetBrainsMono Nerd Font"
+
+    property var bSafe: backend || {}
+    property var currentData: bSafe.current || {}
+    property var hourlyData: bSafe.hourly || []
+    property var dailyData: bSafe.daily || []
+
+    // Helper function to map weather condition text to Nerd Font glyphs
+    function getWeatherIcon(conditionText) {
+        if (!conditionText) return "󰖔" // Default weather icon
+        let cond = conditionText.toLowerCase()
+        if (cond.includes("sun") || cond.includes("clear")) return ""
+        if (cond.includes("partly") || cond.includes("cloud")) return "󰅟"
+        if (cond.includes("thunder") || cond.includes("storm")) return "󰙾"
+        if (cond.includes("rain") || cond.includes("drizzle") || cond.includes("shower")) return "󰖗"
+        if (cond.includes("snow") || cond.includes("ice") || cond.includes("sleet")) return "󰼶"
+        if (cond.includes("fog") || cond.includes("mist")) return "󰖑"
+        if (cond.includes("wind")) return "󰖝"
+        return "󰖔"
+    }
 
     Flickable {
         id: flick
         anchors.fill: parent
-        boundsBehavior: Flickable.StopAtBounds
+        contentHeight: mainColumn.implicitHeight + 32
         flickableDirection: Flickable.VerticalFlick
-        contentHeight: currentSection.height + hourlySection.height + dailySection.height
+        boundsBehavior: Flickable.StopAtBounds
         clip: true
 
         Column {
+            id: mainColumn
             width: parent.width
-            id: contentColumn
-            spacing: 0
+            spacing: 24
 
-            // MARK: Current Weather
+            // MARK: Current Weather Banner
             Item {
-                id: currentSection
                 width: parent.width
-                height: parent.height
+                height: 80
 
+                Rectangle {
+                    id: tempBar
+                    height: parent.height
+                    width: 8
+                    radius: 4
+                    x: 0
+                    y: 0
+                    color: "#89b4fa"
+                }
+
+                // Current Weather Icon (Nerd Font)
+                Text {
+                    id: iconText
+                    text: getWeatherIcon(currentData.condition)
+                    font.family: fontFamily
+                    font.pixelSize: 46
+                    color: "#89b4fa"
+                    x: tempBar.width + 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    id: tempText
+                    text: currentData.temp !== undefined ? Math.round(currentData.temp) + "°F" : "--°F"
+                    font.family: fontFamily
+                    font.pixelSize: 42
+                    font.bold: true
+                    color: "#89b4fa"
+                    x: iconText.x + iconText.width + 12
+                    y: 0
+                }
+
+                Text {
+                    id: conditionText
+                    text: currentData.condition || "Loading..."
+                    font.family: fontFamily
+                    font.pixelSize: 20
+                    color: "#cdd6f4"
+                    x: tempText.x
+                    y: tempText.y + tempText.height - 4
+                }
+
+                // Stats Column (Right-aligned)
                 Column {
-                    anchors.centerIn: parent
-                    spacing: 16
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 4
 
                     Text {
-                        text: backend && backend.current ? backend.current.temp + "°F" : ""
-                        font.pixelSize: 48
-                        font.bold: true
+                        text: "Feels: " + (currentData.feels !== undefined ? Math.round(currentData.feels) + "°F" : "--")
                         font.family: fontFamily
-                        color: "#89b4fa"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 18
+                        color: "#a6adc8"
+                        horizontalAlignment: Text.AlignRight
+                        anchors.right: parent.right
                     }
-
                     Text {
-                        text: backend && backend.current ? backend.current.condition : ""
-                        font.pixelSize: 32
+                        text: "Wind: " + (currentData.wind_mph !== undefined ? currentData.wind_mph + "mph " + (currentData.wind_dir || "") : "--")
                         font.family: fontFamily
-                        color: "#cdd6f4"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 18
+                        color: "#a6adc8"
+                        horizontalAlignment: Text.AlignRight
+                        anchors.right: parent.right
                     }
-
                     Text {
-                        text: backend && backend.current ? "Feels like: " + backend.current.feels + "°F" : ""
-                        font.pixelSize: 24
+                        text: "Humidity: " + (currentData.humidity !== undefined ? currentData.humidity + "%" : "--")
                         font.family: fontFamily
-                        color: "#cdd6f4"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: backend && backend.current ? "Humidity: " + backend.current.humidity + "%" : ""
-                        font.pixelSize: 24
-                        font.family: fontFamily
-                        color: "#cdd6f4"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Text {
-                        text: backend && backend.current ? "Wind: " + backend.current.wind_mph + " mph" : ""
-                        font.pixelSize: 24
-                        font.family: fontFamily
-                        color: "#cdd6f4"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    Image {
-                        source: backend && backend.current ? backend.current.icon : ""
-                        width: 128
-                        height: 128
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 18
+                        color: "#a6adc8"
+                        horizontalAlignment: Text.AlignRight
+                        anchors.right: parent.right
                     }
                 }
             }
 
-            // MARK: Next 8 Hours
+            // MARK: Hourly Timeline
             Item {
-                id: hourlySection
                 width: parent.width
-                height: parent.height
+                height: hourlyCol.implicitHeight
 
                 Column {
-                    anchors.centerIn: parent
-                    spacing: 16
+                    id: hourlyCol
+                    width: parent.width
+                    spacing: 8
 
                     Text {
-                        text: "Next 8 Hours"
-                        font.pixelSize: 36
+                        text: "HOURLY FORECAST"
                         font.family: fontFamily
-                        color: "#ffffff"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 18
+                        font.bold: true
+                        color: "#6c7086"
+                        leftPadding: 20
                     }
 
                     Flickable {
-                        id: hourlyFlick
-                        contentWidth: hourlyRow.width
-                        contentHeight: 200
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width
+                        height: 75
+                        contentWidth: hourlyRow.implicitWidth + 32
+                        flickableDirection: Flickable.HorizontalFlick
+                        boundsBehavior: Flickable.StopAtBounds
                         clip: true
-                        interactive: true
 
                         Row {
                             id: hourlyRow
-                            spacing: 24
+                            x: 20
+                            spacing: 16
 
                             Repeater {
-                                model: backend && backend.hourly ? backend.hourly : []
+                                model: hourlyData
 
-                                Column {
-                                    spacing: 12
-                                    width: 100
+                                Item {
+                                    width: 80
+                                    height: 75
 
-                                    Text {
-                                        text: modelData.time
-                                        font.pixelSize: 22
-                                        font.family: fontFamily
-                                        color: "#cdd6f4"
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
-                                    }
+                                    Column {
+                                        anchors.centerIn: parent
+                                        spacing: 2
 
-                                    Image {
-                                        source: modelData.icon
-                                        width: 64
-                                        height: 64
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                    }
+                                        Text {
+                                            text: modelData.time
+                                            font.family: fontFamily
+                                            font.pixelSize: 16
+                                            color: "#a6adc8"
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                        }
 
-                                    Text {
-                                        text: modelData.temp + "°F"
-                                        font.pixelSize: 24
-                                        font.family: fontFamily
-                                        color: "#89b4fa"
-                                        horizontalAlignment: Text.AlignHCenter
-                                    }
+                                        // Hourly Icon (Nerd Font)
+                                        Text {
+                                            text: getWeatherIcon(modelData.condition)
+                                            font.family: fontFamily
+                                            font.pixelSize: 24
+                                            color: "#89b4fa"
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                        }
 
-                                    Text {
-                                        text: modelData.condition
-                                        font.pixelSize: 18
-                                        font.family: fontFamily
-                                        color: "#cdd6f4"
-                                        horizontalAlignment: Text.AlignHCenter
-                                        wrapMode: Text.Wrap
+                                        Text {
+                                            text: Math.round(modelData.temp) + "°"
+                                            font.family: fontFamily
+                                            font.pixelSize: 18
+                                            font.bold: true
+                                            color: "#cdd6f4"
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                        }
                                     }
                                 }
                             }
@@ -163,75 +197,82 @@ Item {
                 }
             }
 
-            // MARK: Next 3 Days
+            // MARK: 3-Day Forecast List
             Item {
-                id: dailySection
                 width: parent.width
-                height: parent.height
+                height: dailyCol.implicitHeight
 
                 Column {
-                    anchors.centerIn: parent
-                    spacing: 16
+                    id: dailyCol
+                    width: parent.width
+                    spacing: 8
 
                     Text {
-                        text: "Next 3 Days"
-                        font.pixelSize: 36
+                        text: "3-DAY FORECAST"
                         font.family: fontFamily
-                        color: "#ffffff"
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pixelSize: 18
+                        font.bold: true
+                        color: "#6c7086"
+                        leftPadding: 20
                     }
 
                     Repeater {
-                        model: backend && backend.daily ? backend.daily : []
+                        model: dailyData
 
-                        Column {
-                            spacing: 12
+                        Item {
                             width: parent.width
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            height: 60
 
-                            Row {
-                                spacing: 24
-                                anchors.horizontalCenter: parent.horizontalCenter
+                            Rectangle {
+                                id: dayBar
+                                height: parent.height
+                                width: 4
+                                radius: 4
+                                x: 0
+                                y: 0
+                                color: "#a6e3a1"
+                            }
 
-                                Image {
-                                    source: modelData.icon
-                                    width: 64
-                                    height: 64
-                                }
+                            // Daily Icon (Nerd Font)
+                            Text {
+                                id: dayIcon
+                                text: getWeatherIcon(modelData.condition)
+                                font.family: fontFamily
+                                font.pixelSize: 26
+                                color: "#a6e3a1"
+                                x: dayBar.width + 12
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
 
-                                Column {
-                                    spacing: 6
+                            Text {
+                                id: dayDate
+                                text: modelData.date
+                                font.family: fontFamily
+                                font.pixelSize: 22
+                                font.bold: true
+                                color: "#cdd6f4"
+                                x: dayIcon.x + dayIcon.width + 12
+                                y: 4
+                            }
 
-                                    Text {
-                                        text: modelData.date
-                                        font.pixelSize: 24
-                                        font.family: fontFamily
-                                        color: "#cdd6f4"
-                                    }
+                            Text {
+                                text: modelData.condition
+                                font.family: fontFamily
+                                font.pixelSize: 18
+                                color: "#a6adc8"
+                                x: dayDate.x
+                                y: dayDate.y + dayDate.height
+                            }
 
-                                    Text {
-                                        text: "High: " + modelData.maxtemp + "°F"
-                                        font.pixelSize: 22
-                                        font.family: fontFamily
-                                        color: "#89b4fa"
-                                    }
-
-                                    Text {
-                                        text: "Low: " + modelData.mintemp + "°F"
-                                        font.pixelSize: 22
-                                        font.family: fontFamily
-                                        color: "#89b4fa"
-                                    }
-
-                                    Text {
-                                        text: "Condition: " + modelData.condition
-                                        font.pixelSize: 20
-                                        font.family: fontFamily
-                                        color: "#cdd6f4"
-                                        wrapMode: Text.Wrap
-                                    }
-                                }
+                            // High / Low temps aligned to the right
+                            Text {
+                                text: Math.round(modelData.maxtemp) + "° / " + Math.round(modelData.mintemp) + "°"
+                                font.family: fontFamily
+                                font.pixelSize: 22
+                                color: "#89b4fa"
+                                anchors.right: parent.right
+                                anchors.rightMargin: 12
+                                anchors.verticalCenter: parent.verticalCenter
                             }
                         }
                     }

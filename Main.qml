@@ -12,9 +12,21 @@ Window {
     property real topRatio: 0.65   // Top area (square + wide)
     property real bottomRatio: 1-topRatio // Bottom area
 
-    property var squareModel: widgetManager.get_by_slot("square")
-    property var wideModel: widgetManager.get_by_slot("wide")
+    // Initialize as empty arrays to prevent undefined/length errors on startup
+    property var squareModel: []
+    property var wideModel: []
     property var bottomWidget: null
+
+    Component.onCompleted: {
+        // Safely fetch models once the context properties are fully bound
+        squareModel = widgetManager.getBySlot("square")
+        wideModel = widgetManager.getBySlot("wide")
+
+        let bottomWidgets = widgetManager.getBySlot("bottom")
+        if (bottomWidgets.length > 0) {
+            bottomWidget = bottomWidgets[0]
+        }
+    }
 
     Column {
         anchors.fill: parent
@@ -104,17 +116,17 @@ Window {
         Item {
             id: bottomSlot
             width: parent.width
-            height: parent.height * bottomRatio
+            height: parent.height * root.bottomRatio
             clip: true
-            visible: bottomWidget !== null
+            visible: root.bottomWidget !== null
 
             Loader {
                 id: bottomLoader
                 anchors.fill: parent
-                source: bottomWidget ? bottomWidget.qml : ""
+                source: root.bottomWidget ? root.bottomWidget.qml : ""
                 onLoaded: {
-                    if (bottomWidget && item.hasOwnProperty("backend"))
-                        item.backend = bottomWidget.backend
+                    if (root.bottomWidget && item.hasOwnProperty("backend"))
+                        item.backend = root.bottomWidget.backend
                 }
             }
         }

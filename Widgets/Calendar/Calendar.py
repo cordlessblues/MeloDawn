@@ -16,6 +16,7 @@ from random import random
 from pathlib import Path
 import textwrap
 import json
+import requests
 
 
 class CalendarEvent: # MARK: Calendar Event
@@ -116,7 +117,7 @@ class Backend(QObject): # MARK: Backend
         now = datetime.now()
         for e in all_events:
             course = self.parse_course(e.summary)
-            title = e.summary.split("[")[0].strip()
+            title = textwrap.shorten(e.summary.split("[")[0].strip(),36,placeholder=" [...]")
             subject = course
 
             color = None
@@ -152,6 +153,9 @@ class Backend(QObject): # MARK: Backend
         events = self.fetchCalData()
         self._model.setEvents(events)
         self.modelChanged.emit()
+        
+    def rgb_to_hex(self, rgb_tuple):
+        return "#{:02x}{:02x}{:02x}".format(int(rgb_tuple[0]), int(rgb_tuple[1]), int(rgb_tuple[2]))
 # MARK: Metadata & Init
 WIDGET_INFO = {"name": "Calendar", "slot": "wide"}
 def init(context=None): return Backend()

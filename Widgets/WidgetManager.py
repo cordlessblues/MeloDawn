@@ -5,30 +5,30 @@ from PySide6.QtCore import QObject, Slot
 class WidgetManager(QObject):
     def __init__(self, widgets_path):
         super().__init__()
-        self.widgets_path = widgets_path
+        self.widgetsPath = widgets_path
         self.widgets = []
         self._modules = {}
 
-    def load_widgets(self, context=None): # MARK: Load Widgets
+    def loadWidgets(self, context=None): # MARK: Load Widgets
         self.widgets.clear()
 
-        for folder in os.listdir(self.widgets_path):
-            widget_dir = os.path.join(self.widgets_path, folder)
-            if not os.path.isdir(widget_dir):
+        for folder in os.listdir(self.widgetsPath):
+            widgetDir = os.path.join(self.widgetsPath, folder)
+            if not os.path.isdir(widgetDir):
                 continue
 
-            backend_path = os.path.join(widget_dir, f"{folder}.py")
-            qml_path = os.path.join(widget_dir, f"{folder}.qml")
+            backendPath = os.path.join(widgetDir, f"{folder}.py")
+            qmlPath = os.path.join(widgetDir, f"{folder}.qml")
 
-            if not os.path.exists(backend_path):
+            if not os.path.exists(backendPath):
                 print(f"[WidgetManager] Skipping {folder}: no {folder}.py")
                 continue
 
             try:
-                module = self._load_module(folder, backend_path)
+                module = self._loadModule(folder, backendPath)
                 self._modules[folder] = module
 
-                info = getattr(module, "WIDGET_INFO", {})
+                info = getattr(module, "WIDGET_INFO")
                 name = info.get("name", folder)
                 slot = info.get("slot", "wide")
 
@@ -40,7 +40,7 @@ class WidgetManager(QObject):
                     "id": folder,
                     "name": name,
                     "slot": slot,
-                    "qml": qml_path,
+                    "qml": qmlPath,
                     "backend": backend
                 }
 
@@ -50,26 +50,26 @@ class WidgetManager(QObject):
             except Exception as e:
                 print(f"[WidgetManager] Failed to load {folder}: {e}")
 
-    def _load_module(self, name, path): # MARK: Load Module
+    def _loadModule(self, name, path): # MARK: Load Module
         spec = importlib.util.spec_from_file_location(name, path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
 
     @Slot(str, result='QVariantList')
-    def get_by_slot(self, slot):
+    def getBySlot(self, slot):
         result = []
         for w in self.widgets:
             if w["slot"] == slot:
-                backend_obj = w["backend"] if w["backend"] else None
+                backendObject = w["backend"] if w["backend"] else None
                 result.append({
                     "qml": w["qml"],
-                    "backend": backend_obj
+                    "backend": backendObject
                 })
         return result
 
     @Slot(result='QVariantList')
-    def get_all(self):
+    def getAll(self):
         result = []
         for w in self.widgets:
             result.append({
@@ -92,10 +92,10 @@ class WidgetManager(QObject):
             print(f"[WidgetManager] No widget with id {widget_id}")
             return
 
-        backend_path = os.path.join(self.widgets_path, widget_id, "backend.py")
+        backend_path = os.path.join(self.widgetsPath, widget_id, "backend.py")
 
         try:
-            module = self._load_module(widget_id, backend_path)
+            module = self._loadModule(widget_id, backend_path)
             self._modules[widget_id] = module
 
             if hasattr(module, "init"):
