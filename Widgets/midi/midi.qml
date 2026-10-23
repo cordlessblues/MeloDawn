@@ -1,19 +1,23 @@
 import QtQuick
+import QtQuick.Controls
+
 Item {
-    property var backend: null
-    property var backendSafe: backend || {}
     id: midi
     width: 400
     height: 200
 
+    property var backend: null
+    property var backendSafe: backend || {}
+
+    // MARK: MIDI Visualizer Row
     Row {
+        width: parent.width
         anchors.bottom: parent.bottom
-        anchors.fill: parent
+        height: 50
         spacing: 0
 
         Repeater {
-            // FIX: Point the repeater model to the QAbstractListModel (`model`), not the backend object itself
-            model: backend && backend.model ? backend.model : null
+            model: (midi.backend && midi.backend.model) ? midi.backend.model : null
 
             Rectangle {
                 property var baseColor: Qt.rgba(
@@ -23,12 +27,13 @@ Item {
                     1
                 )
 
-                width: midi.width / model.trackCount
+                width: midi.width / (model.trackCount || 1)
                 height: 20
+                anchors.bottom: parent.bottom
 
                 color: Qt.lighter(
                     model.active ? baseColor : Qt.darker(baseColor, 1.5),
-                    1 + model.velocity * 1.5
+                    1 + (model.velocity || 0) * 1.5
                 )
 
                 Behavior on color {
@@ -39,11 +44,11 @@ Item {
                 }
 
                 transform: Scale {
-                    xScale: 1
-                    yScale: model.scaleY
+                    //xScale: 1
+                    yScale: model.scaleY || 1
 
-                    origin.x: width / 2
-                    origin.y: height / 2
+                    //origin.x: width / 2
+                    origin.y: height
 
                     Behavior on yScale {
                         NumberAnimation {
@@ -55,6 +60,15 @@ Item {
             }
         }
     }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            if (backendSafe) {
+                backendSafe.load_random_midi();
+            }
+        }
+    }
+    // MARK: Lyrics Container
     Item {
         id: lyricsContainer
         anchors.horizontalCenter: parent.horizontalCenter
@@ -63,45 +77,46 @@ Item {
         height: 50
         clip: true
 
-        // Row {
-        //     id: lyricRow
-        //     spacing: 6
-        //     anchors.verticalCenter: parent.verticalCenter
+        /*
+        Row {
+            id: lyricRow
+            spacing: 6
+            anchors.verticalCenter: parent.verticalCenter
 
-        //     Behavior on x {
-        //         NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
-        //     }
+            Behavior on x {
+                NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+            }
 
-        //     Repeater {
-        //         id: lyricRepeater
-        //         model: backend.lyricsSegments
+            Repeater {
+                id: lyricRepeater
+                model: midi.backendSafe.lyricsSegments
 
-        //         delegate: Item {
-        //             width: textItem.width
-        //             height: textItem.height
+                delegate: Item {
+                    width: textItem.width
+                    height: textItem.height
 
-        //             Text {
-        //                 id: textItem
-        //                 text: modelData
-        //                 font.pixelSize: 24
-        //                 font.bold: true
-        //                 color: "white"
+                    Text {
+                        id: textItem
+                        text: modelData
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 24
+                        font.bold: true
+                        color: "white"
 
-        //                 x: 40
-        //                 opacity: 0
+                        x: 40
+                        opacity: 0
 
-        //                 // animate the bitch
-        //                 Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
-        //                 Behavior on opacity { NumberAnimation { duration: 150 } }
+                        Behavior on x { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                        Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        //                 Component.onCompleted: {
-        //                     // do thing
-        //                     x = 0
-        //                     opacity = 1
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                        Component.onCompleted: {
+                            x = 0
+                            opacity = 1
+                        }
+                    }
+                }
+            }
+        }
+        */
     }
 }

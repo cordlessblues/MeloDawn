@@ -1,9 +1,10 @@
-from PySide6.QtCore import QObject, Property, Signal, Slot, QTimer, QAbstractListModel, Qt, QModelIndex
+from PySide6.QtCore import QObject, Property, Signal, Slot, QTimer, QAbstractListModel, Qt, QModelIndex, QUrl
 import mido
 import time
 import subprocess
 import random
 import colorsys
+from pathlib import Path
 
 mido.set_backend('mido.backends.rtmidi')
 
@@ -83,14 +84,16 @@ class Backend(QObject): # MARK: Backend
         self._bricks = []
         self._lyric_segments = []
         self._current_lyric_line = ""
-        self._pitch_values = []
+        self._pitch_values = {}
+        self._velocities = {}
+        self._valid_tracks = []
+        self._track_colors = {}
         self._midi_file = None
         self._midi = None
         self._events = []
         self._event_index = 0
         self._start_time = 0.0
         self._running = False
-        self._velocities = []
         self._outport = None
         self._timidity_process = None
 
@@ -114,31 +117,72 @@ class Backend(QObject): # MARK: Backend
     def model(self):
         return self.brickModel
 
+    @Slot()
+    def load_random_midi(self):
+        """Scan the Resources directory and load a random .mid file."""
+        try:
+            # Locate the Resources directory relative to this script
+            resources_dir = Path(__file__).resolve().parent / "Resources"
+            midi_files = list(resources_dir.glob("*.mid"))
+
+            if not midi_files:
+                print("[DEBUG] No .mid files found in Resources/")
+                return
+
+            # Pick a random file
+            chosen_file = random.choice(midi_files)
+            print(f"[DEBUG] Randomly selected MIDI: {chosen_file.name}")
+
+            # Load it using the existing load_midi slot
+            file_url = QUrl.fromLocalFile(str(chosen_file)).toString()
+            self.load_midi(file_url)
+
+        except Exception as e:
+            print(f"[DEBUG] Failed to load random MIDI: {e}")
+
+    @Slot(str)
     def load_midi(self, filepath: str): # MARK: Load
         try:
+            if filepath.startswith("file://"):
+                filepath = QUrl(filepath).toLocalFile()
+
+            print(f"[DEBUG] Loading MIDI from: {filepath}")
             self._midi = mido.MidiFile(filepath)
             self.ticks_per_beat = self._midi.ticks_per_beat
             self._midi_file = filepath
-            self._pitch_values = [0] * len(self._midi.tracks)
             self._precompute_events()
+
+            # Filter out tracks that contain no note events
+            self._valid_tracks = [
+                track_index for track_index, track in enumerate(self._midi.tracks)
+                if any(not msg.is_meta and msg.type in ["note_on", "note_off"] for msg in track)
+            ]
+
+            if not self._valid_tracks:
+                self._valid_tracks = list(range(len(self._midi.tracks)))
+
+            self._pitch_values = {ti: 0 for ti in self._valid_tracks}
+            self._velocities = {ti: 0 for ti in self._valid_tracks}
+
+            self._track_colors = {}
+            for track_index in self._valid_tracks:
+                hue = random.random()
+                r, g, b = colorsys.hsv_to_rgb(hue, 0.8, 0.5)
+                self._track_colors[track_index] = [int(r*255), int(g*255), int(b*255)]
+
             self._start_time = 0.0
             self._running = False
             self._event_index = 0
-            self._velocities = [0] * len(self._midi.tracks)
         except Exception as e:
             print(f"[DEBUG] Failed to load MIDI: {e}")
             return
-        self._track_colors = []
-        for _ in self._midi.tracks:
-            hue = random.random()
-            r, g, b = colorsys.hsv_to_rgb(hue, 0.8, 0.5)
-            self._track_colors.append([int(r*255), int(g*255), int(b*255)])
 
         self.play()
 
     def _precompute_events(self): # MARK: PrecompEvents
         self._events = []
 
+        default_tempo = 500000
         first_tempoFound = False
         for track_index, track in enumerate(self._midi.tracks):
             for msg in track:
@@ -198,7 +242,8 @@ class Backend(QObject): # MARK: Backend
     def stop(self): # MARK: Stop
         self._running = False
         self._timer.stop()
-        self._timidity_process.terminate()
+        if self._timidity_process:
+            self._timidity_process.terminate()
         print("[DEBUG] Playback stopped")
 
     @Slot()
@@ -222,13 +267,16 @@ class Backend(QObject): # MARK: Backend
                     pass
 
             if msg.type == "pitchwheel":
-                self._pitch_values[track_index] = msg.pitch
+                if track_index in self._pitch_values:
+                    self._pitch_values[track_index] = msg.pitch
 
             elif msg.type == "note_on":
-                self._velocities[track_index] = msg.velocity if msg.velocity > 0 else 0
+                if track_index in self._velocities:
+                    self._velocities[track_index] = msg.velocity if msg.velocity > 0 else 0
 
             elif msg.type == "note_off":
-                self._velocities[track_index] = 0
+                if track_index in self._velocities:
+                    self._velocities[track_index] = 0
 
             if msg.type in ("lyrics", "text"):
                 raw = msg.text.replace("\x00", "")
@@ -251,14 +299,15 @@ class Backend(QObject): # MARK: Backend
 
             self._event_index += 1
 
-        for track_index, track in enumerate(self._midi.tracks):
+        num_valid = len(self._valid_tracks)
+        for track_index in self._valid_tracks:
             active = any(
                 0 <= elapsed - e[0] < 0.1 and e[2] == track_index and e[1].type in ["note_on", "note_off"]
                 for e in self._events
             )
 
-            stretch = 1.0 + (self._pitch_values[track_index] / 8192.0 * 0.5)
-            vel = self._velocities[track_index] / 127.0
+            stretch = 1.0 + (self._pitch_values.get(track_index, 0) / 8192.0 * 0.5)
+            vel = self._velocities.get(track_index, 0) / 127.0
             new_bricks.append({
                 "color": self._track_colors[track_index],
                 "trackIndex": track_index,
@@ -267,7 +316,7 @@ class Backend(QObject): # MARK: Backend
                 "height": 20,
                 "scaleY": stretch,
                 "velocity": vel,
-                "trackCount": len(self._midi.tracks)
+                "trackCount": num_valid
             })
 
         self.brickModel.updateBricks(new_bricks)
@@ -290,8 +339,6 @@ if __name__ == "__main__": # MARK: Unit Test
 
     print("[DEBUG] Creating backend")
     backend = Backend()
-    backend._bricks = []
-    backend._lyrics = ""
 
     view = QQuickView()
     view.setColor(Qt.transparent)
@@ -312,7 +359,7 @@ if __name__ == "__main__": # MARK: Unit Test
     )
     print(f"[DEBUG] Test MIDI path: {test_file}")
     if os.path.exists(test_file):
-        backend.load_midi(test_file)
+        backend.load_midi(QUrl.fromLocalFile(test_file).toString())
     else:
         print(f"[DEBUG] Test MIDI not found: {test_file}")
 

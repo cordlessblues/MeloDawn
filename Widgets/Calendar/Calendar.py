@@ -117,7 +117,8 @@ class Backend(QObject): # MARK: Backend
         now = datetime.now()
         for e in all_events:
             course = self.parse_course(e.summary)
-            title = textwrap.shorten(e.summary.split("[")[0].strip(),36,placeholder=" [...]")
+            title = e.summary.split("[")[0].strip()
+            #title = textwrap.shorten(title, width=50, placeholder=" [...]")
             subject = course
 
             color = None
@@ -125,7 +126,14 @@ class Backend(QObject): # MARK: Backend
                 subject_data = cal.get("Subjects", {}).get(course)
                 if subject_data:
                     subject = subject_data["Name"]
-                    color = tuple(subject_data["Color"])
+                    raw_color = subject_data["Color"]
+
+                    # Handle both list/tuple RGB arrays and string hex codes gracefully
+                    if isinstance(raw_color, (list, tuple)):
+                        color = "#{:02x}{:02x}{:02x}".format(int(raw_color[0]), int(raw_color[1]), int(raw_color[2]))
+                    elif isinstance(raw_color, str):
+                        color = raw_color if raw_color.startswith("#") else f"#{raw_color}"
+
                     title = title.split("[")[0]
                     break
 
@@ -134,8 +142,6 @@ class Backend(QObject): # MARK: Backend
                     self.subjectColors[course] = self.hsv_random_color()
                 color = self.subjectColors[course]
 
-            if isinstance(color, tuple):
-                color = self.rgb_to_hex(color)
             output.append(
                 CalendarEvent(
                     title=title,
@@ -153,9 +159,8 @@ class Backend(QObject): # MARK: Backend
         events = self.fetchCalData()
         self._model.setEvents(events)
         self.modelChanged.emit()
-        
-    def rgb_to_hex(self, rgb_tuple):
-        return "#{:02x}{:02x}{:02x}".format(int(rgb_tuple[0]), int(rgb_tuple[1]), int(rgb_tuple[2]))
+
+
 # MARK: Metadata & Init
 WIDGET_INFO = {"name": "Calendar", "slot": "wide"}
 def init(context=None): return Backend()

@@ -47,11 +47,11 @@ Item {
 
                 Rectangle {
                     id: tempBar
-                    height: parent.height
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     width: 8
                     radius: 4
-                    x: 0
-                    y: 0
                     color: "#89b4fa"
                 }
 
@@ -62,7 +62,8 @@ Item {
                     font.family: fontFamily
                     font.pixelSize: 46
                     color: "#89b4fa"
-                    x: tempBar.width + 12
+                    anchors.left: tempBar.right
+                    anchors.leftMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
@@ -73,8 +74,9 @@ Item {
                     font.pixelSize: 42
                     font.bold: true
                     color: "#89b4fa"
-                    x: iconText.x + iconText.width + 12
-                    y: 0
+                    anchors.left: iconText.right
+                    anchors.leftMargin: 12
+                    anchors.top: parent.top
                 }
 
                 Text {
@@ -83,8 +85,9 @@ Item {
                     font.family: fontFamily
                     font.pixelSize: 20
                     color: "#cdd6f4"
-                    x: tempText.x
-                    y: tempText.y + tempText.height - 4
+                    anchors.left: tempText.left
+                    anchors.top: tempText.bottom
+                    anchors.topMargin: -4
                 }
 
                 // Stats Column (Right-aligned)
@@ -150,7 +153,9 @@ Item {
 
                         Row {
                             id: hourlyRow
-                            x: 20
+                            anchors.left: parent.left
+                            anchors.leftMargin: 20
+                            anchors.verticalCenter: parent.verticalCenter
                             spacing: 16
 
                             Repeater {
@@ -225,11 +230,11 @@ Item {
 
                             Rectangle {
                                 id: dayBar
-                                height: parent.height
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
                                 width: 4
                                 radius: 4
-                                x: 0
-                                y: 0
                                 color: "#a6e3a1"
                             }
 
@@ -240,7 +245,8 @@ Item {
                                 font.family: fontFamily
                                 font.pixelSize: 26
                                 color: "#a6e3a1"
-                                x: dayBar.width + 12
+                                anchors.left: dayBar.right
+                                anchors.leftMargin: 12
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
@@ -251,8 +257,10 @@ Item {
                                 font.pixelSize: 22
                                 font.bold: true
                                 color: "#cdd6f4"
-                                x: dayIcon.x + dayIcon.width + 12
-                                y: 4
+                                anchors.left: dayIcon.right
+                                anchors.leftMargin: 12
+                                anchors.top: parent.top
+                                anchors.topMargin: 4
                             }
 
                             Text {
@@ -260,8 +268,8 @@ Item {
                                 font.family: fontFamily
                                 font.pixelSize: 18
                                 color: "#a6adc8"
-                                x: dayDate.x
-                                y: dayDate.y + dayDate.height
+                                anchors.left: dayDate.left
+                                anchors.top: dayDate.bottom
                             }
 
                             // High / Low temps aligned to the right

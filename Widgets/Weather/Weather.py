@@ -6,9 +6,10 @@ from json import load
 class Backend(QObject):
     dataChanged = Signal()
 
-    def __init__(self):
+    def __init__(self, use_12_hour=True):
         super().__init__()
         self._data = {"current": {}, "hourly": [], "daily": []}
+        self.use_12_hour = use_12_hour  # Boolean flag to toggle 12-hour time format
 
         self.api_key = load(open(".ENV.json"))["WeatherAPI"]["Key"]
         self.location = "Eureka, MO"
@@ -25,7 +26,7 @@ class Backend(QObject):
             url = f"http://api.weatherapi.com/v1/forecast.json?key={self.api_key}&q={self.location}&days=3&hours=8"
             data = requests.get(url).json()
 
-            now_hour = datetime.now().hour
+            now = datetime.now()
 
             current = data.get("current", {})
             self._data["current"] = {
@@ -44,10 +45,16 @@ class Backend(QObject):
             hourly_data = data.get("forecast", {}).get("forecastday", [{}])[0].get("hour", [])
             hourly = []
             for h in hourly_data:
-                hour_time = int(h["time"].split(" ")[1].split(":")[0])
-                if hour_time >= now_hour:
+                dt = datetime.strptime(h["time"], "%Y-%m-%d %H:%M")
+                if dt >= now:
+                    # Format time based on the boolean flag
+                    if self.use_12_hour:
+                        time_str = dt.strftime("%I %p").lstrip("0")  # e.g., "3 PM"
+                    else:
+                        time_str = dt.strftime("%H:%M")             # e.g., "15:00"
+
                     hourly.append({
-                        "time": h["time"].split(" ")[1][:5],
+                        "time": time_str,
                         "temp": h.get("temp_f", "--"),
                         "feels": h.get("feelslike_f", "--"),
                         "humidity": h.get("humidity", "--"),
@@ -100,7 +107,7 @@ class Backend(QObject):
 
 # MARK: Metadata & Init
 WIDGET_INFO = {"name": "Weather", "slot": "wide"}
-def init(context=None): return Backend()
+def init(context=None): return Backend(use_12_hour=True)
 
 if __name__ == "__main__": # MARK: Unit Test
     import sys
@@ -110,7 +117,7 @@ if __name__ == "__main__": # MARK: Unit Test
 
     app = QGuiApplication(sys.argv)
 
-    backend = Backend()
+    backend = Backend(use_12_hour=True)
 
     view = QQuickView()
     view.rootContext().setContextProperty("backend", backend)
