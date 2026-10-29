@@ -1,11 +1,20 @@
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import qVersion
 import sys
 import os
 from Widgets.WidgetManager import WidgetManager
+from Widgets.ColorUtils import ColorPallete
+
+# SILENCE YOU FOOL
+os.environ["QT_LOGGING_RULES"] = "qt.qpa.wayland.textinput.warning=false"
 
 app = QApplication(sys.argv)
 engine = QQmlApplicationEngine()
+
+
+pallete = ColorPallete()
+engine.rootContext().setContextProperty("sysColorPallete", pallete)
 
 manager = WidgetManager("./Widgets")
 manager.loadWidgets()

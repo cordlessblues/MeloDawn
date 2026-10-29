@@ -5,13 +5,31 @@ Item {
     id: calendar
 
     property var backend: null
+    property int animDuration: 2000
 
     anchors.fill: parent
+
+    property var rainbowPalette: {
+        var p = (typeof sysColorPallete !== "undefined" && sysColorPallete.colors) ? sysColorPallete.colors : {};
+        return [p.red, p.peach, p.yellow, p.green, p.sky, p.blue, p.mauve, p.pink, p.teal];
+    }
+
+    function getSubjectColor(subjectStr) {
+        if (!subjectStr)
+            return sysColorPallete.colors.primaryAccent;
+        var hash = 0;
+        for (var i = 0; i < subjectStr.length; i++) {
+            hash = subjectStr.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var index = Math.abs(hash) % rainbowPalette.length;
+        return rainbowPalette[index];
+    }
 
     ListView {
         id: eventList
 
         anchors.fill: parent
+        anchors.topMargin: 8
         spacing: 8
         clip: true
 
@@ -22,6 +40,7 @@ Item {
             width: ListView.view.width
             height: 70
 
+            property color subjectBaseColor: calendar.getSubjectColor(model.subject)
 
             Text { //HACK: This is a hidden text item used to measure the width of a single character in the title font for the fade blocks.
                 id: charMeasurer
@@ -37,7 +56,7 @@ Item {
                 width: 8
                 radius: 4
                 anchors.left: parent.left
-                color: Qt.darker(model.color, 1.4)
+                color: Qt.darker(subjectBaseColor, 1.2)
             }
 
             Item {
@@ -54,7 +73,7 @@ Item {
                     text: model.title
                     font.family: "Jetbrains Mono NF"
                     font.pixelSize: 28
-                    color: Qt.lighter(model.color, 1.8)
+                    color: Qt.lighter(subjectBaseColor, 1.4)
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -74,9 +93,9 @@ Item {
                             width: charMeasurer.implicitWidth
                             height: parent.height
 
-                            // Each block steps up in darkness/opacity across the 10 character slots
                             color: {
-                                if (index === 0) return "transparent";
+                                if (index === 0)
+                                    return "transparent";
                                 let t = index / 9.0;
                                 return Qt.rgba(0, 0, 0, Math.min(1.0, Math.pow(t, 1.3) * 1.15));
                             }
@@ -89,7 +108,6 @@ Item {
                     color: Qt.rgba(0, 0, 0, 255)
                     anchors.left: fadeBlocks.right
                     anchors.top: fadeBlocks.top
-
                 }
             }
 
@@ -98,7 +116,7 @@ Item {
                 text: model.subject
                 font.family: "Jetbrains Mono NF"
                 font.pixelSize: 24
-                color: Qt.lighter(model.color, 1.4)
+                color: subjectBaseColor
                 anchors.top: titleContainer.bottom
                 anchors.left: titleContainer.left
             }
@@ -108,11 +126,17 @@ Item {
                 text: model.dueDate
                 font.family: "Jetbrains Mono NF"
                 font.pixelSize: 24
-                color: "#ccc"
+                color: sysColorPallete.colors.subtext0
                 anchors.right: parent.right
                 anchors.rightMargin: 8
                 anchors.top: subject.top
                 y: 0
+            }
+            Behavior on subjectBaseColor {
+                ColorAnimation {
+                    duration: calendar.animDuration
+                    easing.type: Easing.InOutQuad
+                }
             }
         }
     }

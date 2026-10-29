@@ -1,5 +1,6 @@
 .ENV.json
 Widgets/midi/Resources/*
+Widgets/Midi/Resources/*
 Widgets/*/__pycache__
 Widgets/__pycache__
 .qt
@@ -11,4 +12,5 @@ Makefile
 CmakeLists.txt
 qmldir
 build
-
+MidiFixer.py
+conf.json

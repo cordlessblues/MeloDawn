@@ -5,8 +5,12 @@ Item {
     anchors.fill: parent
 
     property var backend: null
-    // Fallback safely to empty object or fallback object structure
-    property var backendSafe: backend ? backend : { ampm: "AM", seconds: 0, time: "%H:%M:%S", date: "%A, %B %d" }
+    property var backendSafe: backend ? backend : {
+        ampm: "AM",
+        seconds: 0,
+        time: "%H:%M:%S",
+        date: "%A, %B %d"
+    }
 
     property real tickHeight: 24
     property real tickWidth: tickHeight / 4
@@ -19,13 +23,11 @@ Item {
     property int effectivePaddingH: paddingH + tickWidth / 2
     property int effectivePaddingV: paddingV + tickHeight / 2
 
-    // Safe fallback check for ampm
-    property color highlightColor: (backendSafe && backendSafe.ampm === "AM") ? "white" : '#f9f4bd'
+    property color highlightColor: (backend && backend.ampm === "AM") ? sysColorPallete.colors.text : lerpColor(sysColorPallete.colors.text, '#f9f4bd', 0.9)
 
     Repeater {
         model: 60
         Rectangle {
-            // Safe fallback check for seconds
             property int currentSecond: (backendSafe && backendSafe.seconds !== undefined) ? backendSafe.seconds : 0
             property int distanceFromSeconds: (index - currentSecond + 60) % 60
             property real gradientFactor: 1 - distanceFromSeconds / 60
@@ -35,81 +37,91 @@ Item {
             property real tickAngle: 0
 
             function updatePosition() {
-                var perimeterStraightH = clock.width - 2*clock.cornerRadius - 2*clock.effectivePaddingH
-                var perimeterStraightV = clock.height - 2*clock.cornerRadius - 2*clock.effectivePaddingV
-                var perimeterCorner = Math.PI * clock.cornerRadius / 2
-                var totalPerimeter = 2*perimeterStraightH + 2*perimeterStraightV + 4*perimeterCorner
+                var perimeterStraightH = clock.width - 2 * clock.cornerRadius - 2 * clock.effectivePaddingH;
+                var perimeterStraightV = clock.height - 2 * clock.cornerRadius - 2 * clock.effectivePaddingV;
+                var perimeterCorner = Math.PI * clock.cornerRadius / 2;
+                var totalPerimeter = 2 * perimeterStraightH + 2 * perimeterStraightV + 4 * perimeterCorner;
 
-                var seg = index / 60 * totalPerimeter
-                var s = seg
+                var seg = index / 60 * totalPerimeter;
+                var s = seg;
 
                 if (s < perimeterStraightH) {
-                    px = clock.effectivePaddingH + clock.cornerRadius + s
-                    py = clock.effectivePaddingV
-                    tickAngle = 0
+                    px = clock.effectivePaddingH + clock.cornerRadius + s;
+                    py = clock.effectivePaddingV;
+                    tickAngle = 0;
                 } else if (s < perimeterStraightH + perimeterCorner) {
-                    var a = (s - perimeterStraightH) / clock.cornerRadius
-                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius + clock.cornerRadius * Math.sin(a)
-                    py = clock.effectivePaddingV + clock.cornerRadius - clock.cornerRadius * Math.cos(a)
-                    tickAngle = a * 180 / Math.PI
+                    var a = (s - perimeterStraightH) / clock.cornerRadius;
+                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius + clock.cornerRadius * Math.sin(a);
+                    py = clock.effectivePaddingV + clock.cornerRadius - clock.cornerRadius * Math.cos(a);
+                    tickAngle = a * 180 / Math.PI;
                 } else if (s < perimeterStraightH + perimeterCorner + perimeterStraightV) {
-                    px = clock.width - clock.effectivePaddingH
-                    py = clock.effectivePaddingV + clock.cornerRadius + (s - perimeterStraightH - perimeterCorner)
-                    tickAngle = 90
-                } else if (s < perimeterStraightH + 2*perimeterCorner + perimeterStraightV) {
-                    var a = (s - perimeterStraightH - perimeterCorner - perimeterStraightV) / clock.cornerRadius
-                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius + clock.cornerRadius * Math.cos(a)
-                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius + clock.cornerRadius * Math.sin(a)
-                    tickAngle = 90 + a*180/Math.PI
-                } else if (s < perimeterStraightH + 2*perimeterCorner + perimeterStraightV + perimeterStraightH) {
-                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius - (s - (perimeterStraightH + 2*perimeterCorner + perimeterStraightV))
-                    py = clock.height - clock.effectivePaddingV
-                    tickAngle = 180
-                } else if (s < perimeterStraightH + 3*perimeterCorner + perimeterStraightV + perimeterStraightH) {
-                    var a = (s - (perimeterStraightH + 2*perimeterCorner + perimeterStraightV + perimeterStraightH)) / clock.cornerRadius
-                    px = clock.effectivePaddingH + clock.cornerRadius - clock.cornerRadius * Math.sin(a)
-                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius + clock.cornerRadius * Math.cos(a)
-                    tickAngle = 180 + a*180/Math.PI
-                } else if (s < 2*perimeterStraightH + 3*perimeterCorner + 2*perimeterStraightV) {
-                    px = clock.effectivePaddingH
-                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius - (s - (perimeterStraightH + 3*perimeterCorner + perimeterStraightV + perimeterStraightH))
-                    tickAngle = 270
+                    px = clock.width - clock.effectivePaddingH;
+                    py = clock.effectivePaddingV + clock.cornerRadius + (s - perimeterStraightH - perimeterCorner);
+                    tickAngle = 90;
+                } else if (s < perimeterStraightH + 2 * perimeterCorner + perimeterStraightV) {
+                    var a = (s - perimeterStraightH - perimeterCorner - perimeterStraightV) / clock.cornerRadius;
+                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius + clock.cornerRadius * Math.cos(a);
+                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius + clock.cornerRadius * Math.sin(a);
+                    tickAngle = 90 + a * 180 / Math.PI;
+                } else if (s < perimeterStraightH + 2 * perimeterCorner + perimeterStraightV + perimeterStraightH) {
+                    px = clock.width - clock.effectivePaddingH - clock.cornerRadius - (s - (perimeterStraightH + 2 * perimeterCorner + perimeterStraightV));
+                    py = clock.height - clock.effectivePaddingV;
+                    tickAngle = 180;
+                } else if (s < perimeterStraightH + 3 * perimeterCorner + perimeterStraightV + perimeterStraightH) {
+                    var a = (s - (perimeterStraightH + 2 * perimeterCorner + perimeterStraightV + perimeterStraightH)) / clock.cornerRadius;
+                    px = clock.effectivePaddingH + clock.cornerRadius - clock.cornerRadius * Math.sin(a);
+                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius + clock.cornerRadius * Math.cos(a);
+                    tickAngle = 180 + a * 180 / Math.PI;
+                } else if (s < 2 * perimeterStraightH + 3 * perimeterCorner + 2 * perimeterStraightV) {
+                    px = clock.effectivePaddingH;
+                    py = clock.height - clock.effectivePaddingV - clock.cornerRadius - (s - (perimeterStraightH + 3 * perimeterCorner + perimeterStraightV + perimeterStraightH));
+                    tickAngle = 270;
                 } else {
-                    var a = (s - (2*perimeterStraightH + 3*perimeterCorner + 2*perimeterStraightV)) / clock.cornerRadius
-                    px = clock.effectivePaddingH + clock.cornerRadius - clock.cornerRadius * Math.cos(a)
-                    py = clock.effectivePaddingV + clock.cornerRadius - clock.cornerRadius * Math.sin(a)
-                    tickAngle = 270 + a*180/Math.PI
+                    var a = (s - (2 * perimeterStraightH + 3 * perimeterCorner + 2 * perimeterStraightV)) / clock.cornerRadius;
+                    px = clock.effectivePaddingH + clock.cornerRadius - clock.cornerRadius * Math.cos(a);
+                    py = clock.effectivePaddingV + clock.cornerRadius - clock.cornerRadius * Math.sin(a);
+                    tickAngle = 270 + a * 180 / Math.PI;
                 }
 
-                x = px - clock.effectivePaddingH/8
-                y = py - clock.effectivePaddingV/4
+                x = px - clock.effectivePaddingH / 8;
+                y = py - clock.effectivePaddingV / 4;
             }
 
             width: clock.tickWidth
             height: clock.tickHeight
             radius: 4
-            color: index === currentSecond ? clock.highlightColor : Qt.rgba(gradientFactor, 0.5, 1 - gradientFactor, 1)
+            color: index === currentSecond ? clock.highlightColor : lerpColor(sysColorPallete.colors.primary, sysColorPallete.colors.secondary, gradientFactor)
             scale: index === currentSecond ? 1.5 : 1
-            
+
             Component.onCompleted: updatePosition()
-            
+
             Connections {
                 target: clock
-                function onWidthChanged() { updatePosition() }
-                function onHeightChanged() { updatePosition() }
+                function onWidthChanged() {
+                    updatePosition();
+                }
+                function onHeightChanged() {
+                    updatePosition();
+                }
             }
 
             transform: Rotation {
-                origin.x: width/2
-                origin.y: height/2
+                origin.x: width / 2
+                origin.y: height / 2
                 angle: tickAngle
             }
 
             Behavior on scale {
-                NumberAnimation { duration: clock.animDuration; easing.type: Easing.InOutQuad }
+                NumberAnimation {
+                    duration: clock.animDuration
+                    easing.type: Easing.InOutQuad
+                }
             }
             Behavior on color {
-                ColorAnimation { duration: clock.animDuration; easing.type: Easing.InOutQuad }
+                ColorAnimation {
+                    duration: clock.animDuration
+                    easing.type: Easing.InOutQuad
+                }
             }
         }
     }
@@ -135,6 +147,13 @@ Item {
     }
 
     Behavior on highlightColor {
-        ColorAnimation { duration: clock.animDuration; easing.type: Easing.InOutQuad }
+        ColorAnimation {
+            duration: clock.animDuration
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    function lerpColor(color1, color2, t) {
+        return Qt.rgba(Qt.color(color1).r * (1 - t) + Qt.color(color2).r * t, Qt.color(color1).g * (1 - t) + Qt.color(color2).g * t, Qt.color(color1).b * (1 - t) + Qt.color(color2).b * t, Qt.color(color1).a * (1 - t) + Qt.color(color2).a * t);
     }
 }

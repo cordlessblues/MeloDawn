@@ -12,7 +12,7 @@ class Backend(QObject):
         self.use_12_hour = use_12_hour  # Boolean flag to toggle 12-hour time format
 
         self.api_key = load(open(".ENV.json"))["WeatherAPI"]["Key"]
-        self.location = "Eureka, MO"
+        self.location = load(open(".ENV.json"))["WeatherAPI"]["Location"]
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateWeather)
@@ -110,17 +110,28 @@ WIDGET_INFO = {"name": "Weather", "slot": "wide"}
 def init(context=None): return Backend(use_12_hour=True)
 
 if __name__ == "__main__": # MARK: Unit Test
-    import sys
     from PySide6.QtGui import QGuiApplication
     from PySide6.QtQuick import QQuickView
     from PySide6.QtCore import QUrl, Qt
-
+    from pathlib import Path
+    import os, sys
+    #SILENCE YOU FOOL
+    os.environ["QT_LOGGING_RULES"] = "qt.qpa.wayland.textinput.warning=false"
+    
+    parentDir = Path(__file__).resolve().parent.parent
+    if str(parentDir) not in sys.path:
+        sys.path.insert(0, str(parentDir))
+    
+    from ColorUtils import ColorPallete
+    pallete = ColorPallete()
+        
     app = QGuiApplication(sys.argv)
 
     backend = Backend(use_12_hour=True)
 
     view = QQuickView()
     view.rootContext().setContextProperty("backend", backend)
+    view.rootContext().setContextProperty("sysColorPallete", pallete)
     view.setSource(QUrl.fromLocalFile("Widgets/Weather/Weather.qml"))
     view.setResizeMode(QQuickView.SizeRootObjectToView)
     view.setFlags(Qt.FramelessWindowHint)
