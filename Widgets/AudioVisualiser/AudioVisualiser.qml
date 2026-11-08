@@ -57,9 +57,10 @@ Item {
 
             Item {
                 id: trackItem
-                property var trackMessages: (typeof model !== "undefined" && model.messages) ? model.messages : []
-                property var trackIdx: (typeof model !== "undefined" && model.trackIndex !== undefined) ? model.trackIndex : 0
-                property string trackLabel: (typeof model !== "undefined" && model.trackLabel) ? model.trackLabel : ("Track " + trackIdx)
+                // Access roles via model.<rolename>
+                property var trackMessages: model.messages || []
+                property var trackIdx: model.trackIndex !== undefined ? model.trackIndex : 0
+                property string trackLabel: "Track " + trackIdx
 
                 property color trackColor: {
                     if (trackIdx === "Meta")
@@ -75,7 +76,7 @@ Item {
                     spacing: 2
 
                     Text {
-                        text: trackItem.trackLabel !== undefined ? trackItem.trackLabel : "Track"
+                        text: trackItem.trackLabel
                         color: trackItem.trackColor
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: 11
@@ -111,26 +112,37 @@ Item {
     // MARK: MIDI Visualizer Row
     Row {
         id: visualizerRow
-        width: parent.width
+        anchors.right: parent.right
+        anchors.rightMargin: 8
+        anchors.left: parent.left
+        anchors.leftMargin: 8
         anchors.bottom: parent.bottom
-        height: 50
-        spacing: 0
+        height: parent.height
+        spacing: 4
 
         Repeater {
             model: (backend && backend.model) ? backend.model : null
 
             Rectangle {
+                property bool isMidi: model.audioType === "midi"
+
                 property color baseColor: {
                     if (model.trackIndex === "Meta")
                         return sysColorPallete.colors.subtext0;
                     return getRainbowColor(typeof model.trackIndex === "number" ? model.trackIndex : index);
                 }
 
-                width: midi.width / (model.trackCount || 1)
-                height: 20
+                width: (visualizerRow.width - (visualizerRow.spacing * ((backend.model.rowCount() > 0 ? backend.model.rowCount() : 8) - 1))) / (backend.model.rowCount() > 0 ? backend.model.rowCount() : 8)
+
+                height: isMidi ? 8 : 8 + (model.scaleY * parent.height)
+
+                radius: isMidi ? (height / 2) : (width / 2)
+
                 anchors.bottom: parent.bottom
 
-                color: Qt.lighter(model.active ? baseColor : Qt.darker(baseColor, 2.0), 0.8 + (model.velocity))
+                anchors.bottomMargin: isMidi ? 8 + (model.scaleY * (parent.height - 30)) : 8
+
+                color: Qt.lighter(model.active ? baseColor : Qt.darker(baseColor, 2.0), 0.8 + (model.velocity / 127.0))
 
                 Behavior on color {
                     ColorAnimation {
@@ -139,15 +151,17 @@ Item {
                     }
                 }
 
-                transform: Scale {
-                    yScale: model.scaleY || 1
-                    origin.y: height
+                Behavior on height {
+                    NumberAnimation {
+                        duration: 175
+                        easing.type: Easing.OutCubic
+                    }
+                }
 
-                    Behavior on yScale {
-                        NumberAnimation {
-                            duration: 175
-                            easing.type: Easing.OutCubic
-                        }
+                Behavior on anchors.bottomMargin {
+                    NumberAnimation {
+                        duration: 120
+                        easing.type: Easing.OutCubic
                     }
                 }
             }

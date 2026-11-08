@@ -1,5 +1,6 @@
 from PySide6.QtCore import QObject, Property, Signal, QFileSystemWatcher, Slot
 from pathlib import Path
+import json
 
 class ColorPallete(QObject):
     colorsChanged = Signal()
@@ -7,7 +8,9 @@ class ColorPallete(QObject):
     def __init__(self):
         super().__init__()
         self.colorPallete = {}
-        self._colorPalleteFilePath = Path(__file__).resolve().parent / "ColorPallete.txt"
+        self.selectedColorPallete = json.load(open("conf.json"))["ColorPallete"]["current"]
+        self._colorPalleteFilePath = Path(__file__).resolve().parent / "ColorPalletes" / self.selectedColorPallete
+        print(F"[INFO][ColorPallete]: loaded {self.selectedColorPallete} color pallete.")
         self.updateColors()
 
         self.watcher = QFileSystemWatcher([str(self._colorPalleteFilePath)])
@@ -30,10 +33,10 @@ class ColorPallete(QObject):
                         new_palette[key] = value if value.startswith("#") else f"#{value}"
                 self.colorPallete = new_palette
         except Exception as e:
-            print(f"[ColorPallete] Failed to read color palette: {e}")
+            print(f"[ERROR][ColorPallete] Failed to read color palette: {e}")
         
     def onFileChanged(self, path):
-        print("[ColorPallete] Palette file changed, reloading colors...")
+        print("[INFO][ColorPallete] Palette file changed, reloading colors...")
         self.updateColors()
         self.colorsChanged.emit()
         
@@ -45,11 +48,17 @@ class ColorPallete(QObject):
         self.colorPallete[key] = value
         self.colorsChanged.emit()
     
-    @Slot()
-    def saveColors(self):
-        with open(self._colorPalleteFilePath, "w") as file:
+    @Slot(str)
+    def saveColors(self, filepath = None):
+        lines = []
+        if filepath == None or filepath == "":
+            print(f"[INFO][ColorPallete]: no filepath provided defaulting to current color pallete.")
+            filepath = self._colorPalleteFilePath
+        with open(filepath, "w") as file:
             for key, color in self.colorPallete.items():
-                print(f'{key} = "{color if color.startswith("#") else f"#{color}"}"')
+                lines.append(f'{key} = "{color if color.startswith("#") else f"#{color}"}"' + "\n")
+            file.writelines(lines)
+            print(F"[INFO][ColorPallete]: {len(lines)} lines written to {filepath.name}.")
 
     @Property(dict, notify=colorsChanged)
     def colors(self):

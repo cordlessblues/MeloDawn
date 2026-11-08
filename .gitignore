@@ -1,8 +1,8 @@
 .ENV.json
-Widgets/midi/Resources/*
-Widgets/Midi/Resources/*
+Widgets/AudioVisualiser/Resources/*
 Widgets/*/__pycache__
 Widgets/__pycache__
+ColorUtils/__pycache__
 .qt
 .vscode
 CMakeFiles

@@ -4,10 +4,12 @@ from PySide6.QtCore import qVersion
 import sys
 import os
 from Widgets.WidgetManager import WidgetManager
-from Widgets.ColorUtils import ColorPallete
+from ColorUtils.ColorPalletes import ColorPallete
 
 # SILENCE YOU FOOL
-os.environ["QT_LOGGING_RULES"] = "qt.qpa.wayland.textinput.warning=false"
+os.environ["QT_LOGGING_RULES"] = (
+    "qt.qpa.wayland.textinput.warning=false;qt.multimedia.ffmpeg*=false"
+)
 
 app = QApplication(sys.argv)
 engine = QQmlApplicationEngine()
@@ -20,6 +22,8 @@ manager = WidgetManager("./Widgets")
 manager.loadWidgets()
 
 engine.rootContext().setContextProperty("widgetManager", manager)
+
+app.aboutToQuit.connect(manager.stopWidgets)
 
 qmlPath = os.path.join(os.path.dirname(__file__), "Main.qml")
 engine.load(qmlPath)

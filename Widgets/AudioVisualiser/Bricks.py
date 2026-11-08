@@ -1,14 +1,13 @@
-from PySide6.QtCore import QAbstractListModel, Qt, QModelIndex
+from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+
 
 class BrickModel(QAbstractListModel):
-    ColorRole = Qt.UserRole + 1
-    TrackIndexRole = Qt.UserRole + 2
-    ActiveRole = Qt.UserRole + 3
-    WidthRole = Qt.UserRole + 4
-    HeightRole = Qt.UserRole + 5
-    ScaleYRole = Qt.UserRole + 6
-    VelocityRole = Qt.UserRole + 7
-    TrackCountRole = Qt.UserRole + 8
+    TrackIndexRole = Qt.UserRole + 1
+    ActiveRole = Qt.UserRole + 2
+    VelocityRole = Qt.UserRole + 3
+    MessagesRole = Qt.UserRole + 4
+    ScaleYRole = Qt.UserRole + 5
+    TypeRole = Qt.UserRole + 6
 
     def __init__(self):
         super().__init__()
@@ -23,33 +22,28 @@ class BrickModel(QAbstractListModel):
 
         brick = self._data[index.row()]
 
-        if role == self.ColorRole:
-            return brick["color"]
         if role == self.TrackIndexRole:
             return brick["trackIndex"]
         if role == self.ActiveRole:
             return brick["active"]
-        if role == self.WidthRole:
-            return brick["width"]
-        if role == self.HeightRole:
-            return brick["height"]
-        if role == self.ScaleYRole:
-            return brick["scaleY"]
         if role == self.VelocityRole:
             return brick["velocity"]
-        if role == self.TrackCountRole:
-            return brick["trackCount"]
+        if role == self.MessagesRole:
+            return brick["messages"]
+        if role == self.ScaleYRole:
+            return brick.get("scaleY", 1.0)
+        if role == self.TypeRole:
+            return brick.get("type", "Unknown")
+        return None
 
     def roleNames(self):
         return {
-            self.ColorRole: b"color",
             self.TrackIndexRole: b"trackIndex",
             self.ActiveRole: b"active",
-            self.WidthRole: b"width",
-            self.HeightRole: b"height",
-            self.ScaleYRole: b"scaleY",
             self.VelocityRole: b"velocity",
-            self.TrackCountRole: b"trackCount",
+            self.MessagesRole: b"messages",
+            self.ScaleYRole: b"scaleY",
+            self.TypeRole: b"audioType",
         }
 
     def updateBricks(self, bricks):
